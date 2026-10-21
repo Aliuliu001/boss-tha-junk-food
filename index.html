@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boss Thả Junk Food - Boss Battle</title>
-    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <link rel="icon" type="image/png" href="logo.png?v=3">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script>
@@ -552,13 +552,22 @@
                         </div>
                         
                         <div class="flex flex-col gap-4">
-                            <div class="flex items-center gap-2 border border-gray-300 rounded-lg p-2 bg-blue-50/50 shadow-sm">
-                                <span class="font-bold text-edNavy text-sm whitespace-nowrap">Giao diện Thẻ:</span>
-                                <select id="card-display-mode" class="p-1 border border-gray-300 rounded text-sm outline-none font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500 bg-white" data-save="card_display">
-                                    <option value="both">Cân đối (75% Hình + 25% Chữ)</option>
-                                    <option value="image">Chỉ hiển thị Hình Ảnh</option>
-                                    <option value="text">Chỉ hiển thị Văn Bản</option>
-                                </select>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2 border border-gray-300 rounded-lg p-2 bg-blue-50/50 shadow-sm">
+                                    <span class="font-bold text-edNavy text-sm whitespace-nowrap">Giao diện Thẻ:</span>
+                                    <select id="card-display-mode" class="p-1 border border-gray-300 rounded text-sm outline-none font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500 bg-white" data-save="card_display">
+                                        <option value="both">Cân đối (75% Hình + 25% Chữ)</option>
+                                        <option value="image">Chỉ hiển thị Hình Ảnh</option>
+                                        <option value="text">Chỉ hiển thị Văn Bản</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center gap-2 border border-gray-300 rounded-lg p-2 bg-sky-50/50 shadow-sm">
+                                    <span class="font-bold text-edNavy text-sm whitespace-nowrap">Ảnh trong thẻ:</span>
+                                    <select id="card-img-fit" class="p-1 border border-sky-300 rounded text-sm outline-none font-semibold text-gray-700 focus:ring-2 focus:ring-sky-500 bg-white" data-save="card_img_fit">
+                                        <option value="cover">Tràn đầy khung (không có viền trắng)</option>
+                                        <option value="contain">Vừa khung (thấy đủ ảnh, có viền trắng)</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="flex items-center gap-2 border border-gray-300 rounded-lg p-2 bg-gray-50">
@@ -633,19 +642,20 @@
                                     <td class="py-4 px-6 font-bold text-gray-700">🎭 Ngoại Hình</td>
                                     <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20 align-top">
                                         <div class="flex items-center gap-3 mb-1">
-                                            <input type="text" id="hero-avatar-id" data-save="hero_avatar_id" value="1" placeholder="ID" class="w-24 p-2 border border-blue-300 rounded font-bold focus:ring-2 focus:ring-blue-500 outline-none text-center">
+                                            <input type="text" id="hero-avatar-id" data-save="hero_avatar_id" value="1" placeholder="ID hoặc dán link ảnh" class="w-56 p-2 border border-blue-300 rounded font-bold focus:ring-2 focus:ring-blue-500 outline-none text-center">
                                             <img id="hero-avatar-preview" src="https://placehold.co/40x40/e2e8f0/64748b?text=1" class="w-10 h-10 rounded-full border-2 border-blue-400 object-cover shadow-sm bg-white">
                                         </div>
-                                        <span class="text-xs text-gray-500 italic">Ảnh tự quét từ thư mục Hero/ local (.png/.jpg)</span>
+                                        <span class="text-xs text-gray-500 italic">Dán <b>link ảnh bất kỳ</b> (Google/Drive/Tenor) HOẶC gõ <b>SỐ ID</b> có trong 📦 Kho ảnh. Bấm 📷 để chụp/ngambil ảnh ngay.</span>
                                     </td>
                                     <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20 align-top">
                                         <div class="flex items-start gap-2 mb-2">
                                             <input type="text" id="boss-theme-id" data-save="boss_theme_id" value="12582594" class="w-full p-2 border border-red-300 rounded font-bold text-center focus:ring-2 focus:ring-red-500 outline-none" placeholder="Tenor Link/ID hoặc Link Ảnh">
                                         </div>
                                         <div class="text-[11px] text-gray-600 bg-white p-2 rounded border border-red-200 shadow-inner leading-relaxed">
-                                            <strong class="text-red-700 block mb-1">📌 Hướng dẫn hiển thị Boss (Sửa lỗi dừng hình):</strong>
-                                            - <strong>Cách 1 (Link trực tiếp - Khuyên dùng 100%):</strong> Chuột phải vào GIF trên Tenor/Google -> Chọn <kbd class="bg-gray-100 px-1 border rounded">Sao chép địa chỉ hình ảnh</kbd>. Dán link đuôi .gif vào.<br>
-                                            - <strong>Cách 2 (Dùng ID Tenor):</strong> Copy ID số của Tenor.
+                                            <strong class="text-red-700 block mb-1">📌 3 cách đổi hình Boss (chọn 1):</strong>
+                                            - <strong>Cách 1 (Link ảnh bất kỳ - Khuyên dùng):</strong> Chuột phải vào ảnh/GIF trên Google -> <kbd class="bg-gray-100 px-1 border rounded">Sao chép địa chỉ hình ảnh</kbd> rồi dán vào ô trên.<br>
+                                            - <strong>Cách 2 (ID Tenor):</strong> Copy dãy số cuối link Tenor.<br>
+                                            - <strong>Cách 3 (📷 ngay tại chỗ):</strong> Bấm nút 📷 bên dưới để chụp/chọn ảnh trong máy -> lưu vào 📦 Kho ảnh.
                                         </div>
                                     </td>
                                 </tr>
@@ -653,7 +663,7 @@
                                     <td class="py-4 px-6 font-bold text-gray-700">🌌 Hình Nền (Background)</td>
                                     <td colspan="2" class="py-4 px-6 border-l border-gray-200 bg-purple-50/20">
                                         <div class="flex items-center gap-2 mb-2">
-                                            <input type="text" id="game-bg-id" data-save="game_bg_id" value="" class="flex-1 p-2 border border-purple-300 rounded font-bold text-center focus:ring-2 focus:ring-purple-500 outline-none bg-white" placeholder="Nhập Link Ảnh (.jpg, .png, .gif) hoặc Tenor Link/ID để đổi nền">
+                                            <input type="text" id="game-bg-id" data-save="game_bg_id" value="" class="flex-1 p-2 border border-purple-300 rounded font-bold text-center focus:ring-2 focus:ring-purple-500 outline-none bg-white" placeholder="Dán link ảnh bất kỳ, hoặc Tenor ID, hoặc SỐ ID trong kho">
                                             <div class="flex items-center gap-1 bg-white p-2 rounded border border-purple-300 shadow-sm shrink-0">
                                                 <span class="text-xs font-bold text-purple-900">Độ mờ:</span>
                                                 <input type="number" id="game-bg-opacity" data-save="game_bg_opacity" value="40" min="0" max="100" class="w-12 text-center font-bold text-purple-700 outline-none border-b border-purple-200 focus:border-purple-500">
@@ -2081,16 +2091,8 @@
                     scoreEl.textContent = currentDisp;
                 }, 30);
 
-                if (heroId) {
-                    const lbPoolHit = (window.poolSrc ? poolSrc(heroId) : null);
-                    if (lbPoolHit) { avatar.onerror = null; avatar.src = lbPoolHit; }
-                    else {
-                        avatar.src = `Hero/${heroId}.png`;
-                        avatar.onerror = function() {
-                            if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
-                            else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
-                        };
-                    }
+                if (heroId && window.setImgById) {
+                    setImgById(avatar, heroId, 'Hero', 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO');
                 }
 
                 if (winner === 'hero') {
@@ -2130,10 +2132,14 @@
                     const rankColor = index === 0 ? 'text-yellow-400 drop-shadow-[0_0_8px_yellow]' : index === 1 ? 'text-gray-300 drop-shadow-[0_0_5px_white]' : index === 2 ? 'text-orange-400 drop-shadow-[0_0_5px_orange]' : 'text-blue-300';
                     const rankIcon = index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
                     
-                    const rowPoolHit = (window.poolSrc ? poolSrc(row.avatarId) : null);
-                    let imgSrc = rowPoolHit || `Hero/${row.avatarId}.png`;
-                    let fallbackSrc = rowPoolHit || `Hero/${row.avatarId}.jpg`;
+                    let imgSrc = `Hero/${row.avatarId}.png`;
+                    let fallbackSrc = `Hero/${row.avatarId}.jpg`;
                     let finalFallback = `https://placehold.co/100x100/1E3A8A/F6C90E?text=${row.name.charAt(0).toUpperCase()}`;
+                    if (window.setImgById) {
+                        const _av = row.avatarId;
+                        const _p = (window.poolSrc ? poolSrc(_av) : null);
+                        if (_p || window.isImageUrl(_av)) { imgSrc = _p || _av; fallbackSrc = finalFallback; }
+                    }
 
                     const item = document.createElement('div');
                     item.className = `w-full grid grid-cols-[10%_15%_35%_10%_10%_20%] gap-2 items-center p-2 rounded-lg transition-colors ${isTop3 ? 'bg-gradient-to-r from-blue-800/60 to-blue-900/40 border border-blue-500/30' : 'bg-blue-950/40 hover:bg-blue-800/40'}`;
@@ -2779,22 +2785,9 @@
                 const startHeroAvatar = document.getElementById('start-hero-avatar');
                 
                 if (heroId) {
-                    const heroPoolHit = (window.poolSrc ? poolSrc(heroId) : null);
-                    if (heroPoolHit) {
-                        mainHeroAvatar.onerror = null; mainHeroAvatar.src = heroPoolHit;
-                        if (startHeroAvatar) { startHeroAvatar.onerror = null; startHeroAvatar.src = heroPoolHit; }
-                    } else {
-                        const fallbackLogic = function() {
-                            if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
-                            else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
-                        };
-                        mainHeroAvatar.src = `Hero/${heroId}.png`;
-                        mainHeroAvatar.onerror = fallbackLogic;
-
-                        if(startHeroAvatar) {
-                            startHeroAvatar.src = `Hero/${heroId}.png`;
-                            startHeroAvatar.onerror = fallbackLogic;
-                        }
+                    if (window.setImgById) {
+                        setImgById(mainHeroAvatar, heroId, 'Hero', 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO');
+                        if (startHeroAvatar) setImgById(startHeroAvatar, heroId, 'Hero', 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO');
                     }
                 }
 
@@ -2905,14 +2898,8 @@
             if (heroAvatarInput && heroAvatarPreview) {
                 heroAvatarInput.addEventListener('input', function() {
                     const val = this.value.trim();
-                    if(val) {
-                        const prevPoolHit = (window.poolSrc ? poolSrc(val) : null);
-                        if (prevPoolHit) { heroAvatarPreview.onerror = null; heroAvatarPreview.src = prevPoolHit; return; }
-                        heroAvatarPreview.src = `Hero/${val}.png`;
-                        heroAvatarPreview.onerror = function() {
-                            if (this.src.includes('.png')) this.src = `Hero/${val}.jpg`;
-                            else { this.onerror = null; this.src = `https://placehold.co/40x40/e2e8f0/64748b?text=${val}`; }
-                        };
+                    if(val && window.setImgById) {
+                        setImgById(heroAvatarPreview, val, 'Hero', `https://placehold.co/40x40/e2e8f0/64748b?text=${encodeURIComponent(val.slice(0,3))}`);
                     } else {
                         heroAvatarPreview.src = `https://placehold.co/40x40/e2e8f0/64748b?text=N/A`;
                     }
@@ -3472,6 +3459,233 @@
                     renderPool();
                     refreshGridPreviews();
                 });
+            });
+        })();
+    </script>
+    <script>
+        /* ============================================================
+           Gói nâng cấp 2 (em thêm, không đụng logic game):
+           1) HERO/BOSS/NỀN nhận LINK ảnh bất kỳ (Google/Drive/Tenor) + ID kho ảnh
+           2) Nút 📷 Chụp/Chọn ảnh ngay (không cần Google Drive) + 🖼️ Chọn trong kho
+           3) Ảnh thẻ tràn đầy khung (object-cover) — có chọn lại kiểu hiển thị
+           ============================================================ */
+        (function() {
+            'use strict';
+
+            var PLACE_HERO = 'https://placehold.co/300x300/1E3A8A/F6C90E?text=HERO';
+
+            function isUrl(v) { return /^(https?:|data:)/i.test(String(v || '').trim()); }
+            window.isImageUrl = isUrl;
+
+            /* Đặt ảnh cho 1 thẻ <img>: ưu tiên URL trực tiếp -> kho ảnh -> Hero/ID.png -> Hero/ID.jpg -> ảnh mờ */
+            window.setImgById = function(imgEl, val, localPrefix, finalFallback) {
+                if (!imgEl) return;
+                var v = String(val == null ? '' : val).trim();
+                if (!v) { imgEl.onerror = null; imgEl.src = finalFallback; return; }
+                var chain = [];
+                if (isUrl(v)) chain.push(v);
+                else {
+                    var p = window.poolSrc ? poolSrc(v) : null;
+                    if (p) chain.push(p);
+                    if (localPrefix) chain.push(localPrefix + '/' + v + '.png', localPrefix + '/' + v + '.jpg');
+                }
+                if (!chain.length) chain.push(finalFallback);
+                var i = 0;
+                imgEl.onerror = function() {
+                    i++;
+                    if (i < chain.length) { imgEl.src = chain[i]; }
+                    else { imgEl.onerror = null; imgEl.src = finalFallback; }
+                };
+                imgEl.src = chain[0];
+            };
+
+            /* ---------- Thêm nút chụp/chọn ảnh vào 1 ô nhập ---------- */
+            function ensureIds() {
+                if (window.__photoBtnIds) return window.__photoBtnIds;
+                var ids = { seq: 0 };
+                window.__photoBtnIds = ids;
+                return ids;
+            }
+
+            function addPhotoButtons(inputId, tone) {
+                var input = document.getElementById(inputId);
+                if (!input) return null;
+                var cell = input.closest('td') || input.parentElement;
+                if (!cell || cell.querySelector('[data-photo-bar]')) return null;
+
+                var bar = document.createElement('div');
+                bar.setAttribute('data-photo-bar', '1');
+                bar.className = 'flex flex-wrap gap-1.5 mt-2';
+
+                var ids = ensureIds();
+                ids.seq += 1;
+                var filePickId = 'photo-pick-' + ids.seq;
+                var fileCamId = 'photo-cam-' + ids.seq;
+
+                var btnClass = 'bg-' + tone + '-500 hover:bg-' + tone + '-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow transition';
+
+                bar.innerHTML =
+                    '<button type="button" class="' + btnClass + '" data-role="pick">🖼️ Chọn trong kho</button>' +
+                    '<label class="' + btnClass + ' cursor-pointer">📷 Chụp / Chọn ảnh<input type="file" accept="image/*" id="' + filePickId + '" class="hidden"></label>' +
+                    '<label class="' + btnClass + ' cursor-pointer hidden" data-role="camwrap">📸 Chụp bằng camera<input type="file" accept="image/*" capture="environment" id="' + fileCamId + '" class="hidden"></label>';
+                cell.appendChild(bar);
+
+                var doUpload = function(fileList) {
+                    var f = fileList && fileList[0];
+                    if (!f) return;
+                    var current = String(input.value || '').trim();
+                    var idToUse;
+                    if (current && !isUrl(current)) idToUse = current;
+                    else idToUse = (window.__cleanIdFromName ? __cleanIdFromName(f.name) : f.name.replace(/\.[a-z0-9]+$/i, '').trim()) || ('img' + Date.now());
+                    window.__ingestOne(f, idToUse).then(function(ok) {
+                        if (ok) {
+                            input.value = idToUse;
+                            input.dispatchEvent(new Event('input'));
+                            if (window.bjfAlert) bjfAlert('✅ Đã gắn ảnh "' + idToUse + '" vào ô này (lưu trong 📦 Kho ảnh).', 'alert');
+                        } else if (window.bjfAlert) {
+                            bjfAlert('❌ Không đọc được file ảnh đó. Thử ảnh JPG/PNG nhé.', 'alert');
+                        }
+                    });
+                };
+
+                bar.querySelector('[data-role="pick"]').addEventListener('click', function() {
+                    showPoolPicker(function(pickedId) {
+                        input.value = pickedId;
+                        input.dispatchEvent(new Event('input'));
+                    });
+                });
+                document.getElementById(filePickId).addEventListener('change', function() { doUpload(this.files); this.value = ''; });
+                var camInput = document.getElementById(fileCamId);
+                if (camInput) camInput.addEventListener('change', function() { doUpload(this.files); this.value = ''; });
+
+                // Điện thoại thì thêm nút camera riêng; máy tính ẩn đi
+                if (!(('ontouchstart' in window) && window.innerWidth < 900)) {
+                    var camWrap = bar.querySelector('[data-role="camwrap"]');
+                    if (camWrap) camWrap.classList.add('hidden');
+                }
+                return bar;
+            }
+
+            /* ---------- Bảng chọn ảnh trong kho ---------- */
+            var pickerEl = null;
+            function showPoolPicker(onPick) {
+                pickerCallback = onPick;
+                ensurePicker();
+                renderPicker();
+                pickerEl.classList.remove('hidden');
+                pickerEl.classList.add('flex');
+            }
+            function ensurePicker() {
+                if (!pickerEl) {
+                    pickerEl = document.createElement('div');
+                    pickerEl.id = 'pool-picker-overlay';
+                    pickerEl.className = 'fixed inset-0 bg-black/70 backdrop-blur-md z-[999998] hidden items-center justify-center';
+                    pickerEl.innerHTML =
+                        '<div class="bg-edKem rounded-2xl border-4 border-edNavy shadow-2xl w-[860px] max-w-[92vw] max-h-[86vh] flex flex-col overflow-hidden">' +
+                        '  <div class="bg-edNavy text-white px-5 py-3 flex justify-between items-center">' +
+                        '    <h3 class="text-lg font-black uppercase tracking-wider text-edVang">🖼️ Chọn ảnh trong 📦 Kho ảnh</h3>' +
+                        '    <button id="pool-picker-close" class="text-2xl leading-none hover:text-edVang">✖</button>' +
+                        '  </div>' +
+                        '  <div class="p-4 overflow-y-auto">' +
+                        '    <div id="pool-picker-grid" class="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3"></div>' +
+                        '  </div>' +
+                        '</div>';
+                }
+                document.body.appendChild(pickerEl);
+                document.getElementById('pool-picker-close').addEventListener('click', function() { pickerEl.classList.add('hidden'); pickerEl.classList.remove('flex'); });
+                pickerEl.addEventListener('click', function(e) { if (e.target === pickerEl) { pickerEl.classList.add('hidden'); pickerEl.classList.remove('flex'); } });
+            }
+            var pickerCallback = null;
+
+            function renderPicker() {
+                var grid = document.getElementById('pool-picker-grid');
+                if (!grid) return;
+                grid.innerHTML = '';
+                var pool = window.imagesPool || {};
+                var ids = Object.keys(pool).sort(function(a, b) {
+                    var na = parseFloat(a), nb = parseFloat(b);
+                    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+                    return String(a).localeCompare(String(b));
+                });
+                if (!ids.length) {
+                    grid.innerHTML = '<div class="col-span-full text-center text-gray-500 italic py-8">Kho ảnh đang trống. Vào tab 1. DATA để 📷 thêm ảnh trước nhé.</div>';
+                    return;
+                }
+                ids.forEach(function(id) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'flex flex-col items-center gap-1 p-1.5 rounded-xl border-2 border-amber-200 bg-white hover:border-amber-500 hover:bg-amber-50 transition';
+                    b.innerHTML = '<img src="' + pool[id] + '" class="w-[80px] h-[80px] object-contain bg-gray-50 rounded-lg"><span class="text-[11px] font-black text-edNavy truncate w-full text-center">' + id + '</span>';
+                    b.addEventListener('click', function() {
+                        if (pickerCallback) pickerCallback(id);
+                        pickerEl.classList.add('hidden'); pickerEl.classList.remove('flex');
+                    });
+                    grid.appendChild(b);
+                });
+            }
+
+            /* ---------- 1 file -> nén -> ghi vào kho theo ID cho trước ---------- */
+            window.__cleanIdFromName = function(name) {
+                return String(name || '').replace(/\.[a-z0-9]+$/i, '').trim();
+            };
+            window.__ingestOne = function(file, idToUse) {
+                if (!window.bjfCompress) return Promise.resolve(false);
+                return window.bjfCompress(file).then(function(dataURL) {
+                    if (!dataURL) return false;
+                    var pool = window.imagesPool;
+                    pool[idToUse] = dataURL;
+                    if (window.renderPool) renderPool();
+                    if (window.markMissingImages) markMissingImages();
+                    // ghiIndexedDB
+                    return new Promise(function(res) {
+                        try {
+                            var req = indexedDB.open('BossJunkFoodDB', 1);
+                            req.onupgradeneeded = function() { var db = req.result; if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
+                            req.onsuccess = function() {
+                                var db = req.result;
+                                var tx = db.transaction('kv', 'readwrite');
+                                tx.objectStore('kv').put(JSON.parse(JSON.stringify(pool)), 'imagesPool');
+                                tx.oncomplete = function() { res(true); };
+                                tx.onerror = function() { res(true); };
+                            };
+                            req.onerror = function() { res(true); };
+                        } catch (e) { res(true); }
+                    });
+                }).catch(function() { return false; });
+            };
+
+            /* ---------- 3) Ảnh thẻ tràn khung ---------- */
+            function applyCardFit() {
+                var sel = document.getElementById('card-img-fit');
+                var mode = sel ? sel.value : 'cover';
+                for (var i = 1; i <= 3; i++) {
+                    var img = document.getElementById('card-' + i + '-img');
+                    if (!img) continue;
+                    if (mode === 'contain') { img.classList.remove('object-cover'); img.classList.add('object-contain'); img.style.padding = '4px'; }
+                    else { img.classList.remove('object-contain'); img.classList.add('object-cover'); img.style.padding = '0px'; }
+                }
+            }
+            window.applyCardFit = applyCardFit;
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // nút cho ô HERO, BOSS, NỀN
+                addPhotoButtons('hero-avatar-id', 'blue');
+                addPhotoButtons('boss-theme-id', 'red');
+                addPhotoButtons('game-bg-id', 'purple');
+
+                // chọn kiểu hiển thị ảnh thẻ
+                var fitSel = document.getElementById('card-img-fit');
+                if (fitSel) fitSel.addEventListener('change', applyCardFit);
+                applyCardFit();
+
+                // HERO nhận link URL trực tiếp: sửa preview trong Settings
+                var heroInput = document.getElementById('hero-avatar-id');
+                var heroPreview = document.getElementById('hero-avatar-preview');
+                if (heroInput && heroPreview) {
+                    heroInput.addEventListener('input', function() {
+                        window.setImgById(heroPreview, this.value, 'Hero', 'https://placehold.co/40x40/e2e8f0/64748b?text=N/A');
+                    });
+                }
             });
         })();
     </script>
