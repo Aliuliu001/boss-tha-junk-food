@@ -1,0 +1,2985 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Thả Junk Food - Boss Battle</title>
+    <link rel="icon" type="image/png" href="logo.png?v=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: { edKem: '#FFFBF0', edVang: '#F6C90E', edVangHover: '#DDAA00', edNavy: '#1E3A8A', edNavyLight: '#2563EB', edXanhRing: '#3B82F6' },
+                    boxShadow: { 'ed': '0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06)', 'ed-lg': '0 10px 15px -3px rgba(30, 58, 138, 0.1), 0 4px 6px -2px rgba(30, 58, 138, 0.05)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f3f4f6; } 
+        #settings-modal { transition: opacity 0.2s ease-in-out; }
+        .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        .excel-table th { background-color: #1E3A8A; color: white; border: 1px solid #cbd5e1; padding: 8px; font-weight: 700; position: sticky; top: 0; z-index: 10; }
+        .excel-table td { border: 1px solid #cbd5e1; padding: 0; position: relative; height: 40px; background: white; }
+        .excel-table td.row-num { background-color: #f1f5f9; text-align: center; color: #64748b; font-weight: bold; width: 50px; }
+        .excel-input { width: 100%; height: 100%; border: none; padding: 8px; outline: none; background: transparent; font-family: inherit; font-size: 14px; }
+        .excel-input.text-left { text-align: left; }
+        .excel-input.text-center { text-align: center; }
+        .excel-cell.focused { outline: 2px solid #3B82F6; outline-offset: -2px; z-index: 5; }
+        .custom-checkbox { width: 1.2rem; height: 1.2rem; cursor: pointer; }
+        .table-container { max-height: 60vh; overflow-y: auto; overflow-x: auto; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .img-preview { width: 32px; height: 32px; object-fit: contain; background: #e2e8f0; border-radius: 4px; border: 1px solid #cbd5e1; margin-left: 4px; }
+        .tab-btn.active { background-color: #1E3A8A !important; color: white !important; }
+        .tab-btn { background-color: #e5e7eb; color: #374151; transition: all 0.2s; }
+        .tab-btn:hover:not(.active) { background-color: #d1d5db; }
+        .tab-content { display: none !important; }
+        .tab-content.active { display: block !important; }
+        #tab-data.active { display: flex !important; }
+        
+        @keyframes float-breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.02); } }
+        .animate-boss { animation: float-breathe 4s ease-in-out infinite; }
+        @keyframes spin-aura { from { transform: rotateX(70deg) rotateZ(0deg); } to { transform: rotateX(70deg) rotateZ(360deg); } }
+        .animate-aura { animation: spin-aura 15s linear infinite; }
+        @keyframes sweep { 0% { left: -100%; } 100% { left: 200%; } }
+        @keyframes flash-reroll { 0% { filter: brightness(1); transform: scale(1); } 50% { filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 20px red); transform: scale(0.95); } 100% { filter: brightness(1); transform: scale(1); } }
+        .flash-effect { animation: flash-reroll 0.4s ease-in-out; }
+        @keyframes shatter { 0% { transform: scale(1) rotate(0deg); opacity: 1; filter: blur(0); } 50% { transform: scale(1.1) rotate(5deg) skewX(10deg); opacity: 0.8; filter: brightness(1.5); } 100% { transform: scale(0.5) rotate(15deg) translateY(50px); opacity: 0; filter: blur(10px); } }
+        .shatter-anim { animation: shatter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; pointer-events: none; }
+        .text-shadow { text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes shake-hard {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-15px) rotate(-3deg); filter: drop-shadow(0 0 10px red); }
+            20%, 40%, 60%, 80% { transform: translateX(15px) rotate(3deg); filter: drop-shadow(0 0 10px red); }
+        }
+        .shake-hard { animation: shake-hard 0.5s ease-in-out; }
+
+        @keyframes heal-bounce {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.15); filter: brightness(1.5) drop-shadow(0 0 20px #22c55e); }
+        }
+        .heal-bounce { animation: heal-bounce 0.8s ease-in-out; }
+
+        @keyframes float-up-fade {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-120px) scale(2.5); opacity: 0; }
+        }
+        .emoji-float { animation: float-up-fade 1.2s forwards; position: absolute; pointer-events: none; z-index: 100; }
+        
+        /* Effect Classes */
+        .burn-effect { filter: sepia(1) hue-rotate(-50deg) saturate(300%) brightness(0.8) contrast(1.5) !important; animation: shake-hard 0.2s infinite; border-color: #7f1d1d !important; }
+        .frozen-boss { filter: hue-rotate(180deg) saturate(150%) brightness(0.9) drop-shadow(0 0 30px cyan) !important; border-color: #22d3ee !important; }
+        .frozen-boss::after { content: "❄️"; position: absolute; font-size: 80px; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.8; z-index: 50; }
+        .bow-buffed { box-shadow: 0 0 40px #facc15, inset 0 0 20px white !important; border-color: #fef08a !important; animation: pulse 1s infinite; filter: brightness(1.2); }
+        
+        /* Thunder & Confusion Classes */
+        @keyframes flash-screen { 0%, 100% { opacity: 0; } 10%, 30% { opacity: 0.8; background: white; } }
+        .flash-screen-fx { animation: flash-screen 0.5s ease-out forwards; pointer-events: none; z-index: 9999; }
+        
+        @keyframes confuse-card-1 {
+            0%, 100% { transform: rotate(0deg) scale(1); filter: blur(0px) hue-rotate(0deg); opacity: 1; }
+            25% { transform: rotate(5deg) scale(0.95); filter: blur(3px) hue-rotate(90deg); opacity: 0.8; }
+            50% { transform: rotate(-5deg) scale(1.05) skewX(5deg); filter: blur(5px) hue-rotate(180deg); opacity: 0.6; }
+            75% { transform: rotate(180deg) scale(0.9); filter: blur(3px) hue-rotate(270deg); opacity: 0.9; }
+        }
+        @keyframes confuse-card-2 {
+            0%, 100% { transform: translateX(0) translateY(0); filter: blur(0px) saturate(1); opacity: 1; }
+            25% { transform: translateX(-10px) translateY(10px) rotate(-5deg); filter: blur(4px) saturate(2); opacity: 0.7; }
+            50% { transform: translateX(10px) translateY(-10px) rotate(5deg); filter: blur(2px) saturate(0.5); opacity: 0.9; }
+            75% { transform: translateX(-5px) translateY(-5px) scale(0.9); filter: blur(5px) saturate(3); opacity: 0.5; }
+        }
+        @keyframes confuse-card-3 {
+            0%, 100% { transform: perspective(400px) rotateY(0deg) scale(1); filter: blur(0px); opacity: 1; }
+            50% { transform: perspective(400px) rotateY(180deg) scale(1.1); filter: blur(4px) contrast(1.5); opacity: 0.8; }
+        }
+        
+        .confused-card-1 { animation: confuse-card-1 1.5s infinite linear; pointer-events: none !important; }
+        .confused-card-2 { animation: confuse-card-2 1.2s infinite ease-in-out; pointer-events: none !important; }
+        .confused-card-3 { animation: confuse-card-3 1.8s infinite ease-in-out; pointer-events: none !important; }
+
+        .hero-win-glow {
+            animation: winGlow 2s infinite alternate ease-in-out;
+            z-index: 100 !important;
+        }
+        @keyframes winGlow {
+            0% { transform: scale(1); box-shadow: 0 0 20px #F6C90E; border-color: #F6C90E; }
+            100% { transform: scale(1.3); box-shadow: 0 0 60px #F6C90E, 0 0 100px white; border-color: white; }
+        }
+
+        .loser-grayscale-shake {
+            filter: grayscale(100%) brightness(0.4) contrast(1.2) !important;
+            animation: loserShake 0.4s infinite linear;
+        }
+        @keyframes loserShake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-3deg); }
+            75% { transform: translateX(5px) rotate(3deg); }
+        }
+
+        @keyframes floatDownParticle {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        .particle-fall { animation: floatDownParticle 5s linear forwards; position: absolute; z-index: 90; pointer-events: none; }
+
+        @keyframes popInElement {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in-element { animation: popInElement 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes popUpEpic {
+            0% { transform: translate(-50%, 0px) scale(0); opacity: 0; }
+            70% { transform: translate(-50%, -140px) scale(4.2); opacity: 1; }
+            100% { transform: translate(-50%, -120px) scale(4); opacity: 1; }
+        }
+        .pop-up-epic { animation: popUpEpic 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 1 !important; z-index: 9999 !important; }
+
+        @keyframes tearDropEnd {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(60px) scale(0.5); opacity: 0; }
+        }
+        .tear-drop-anim { animation: tearDropEnd 1s linear forwards; position: absolute; pointer-events: none; z-index: 95; }
+
+        @keyframes orbit-spin {
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes orbit-counter-spin {
+            100% { transform: translate(-50%, -50%) rotate(-360deg); }
+        }
+        .orbit-system {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0; height: 0;
+            animation: orbit-spin 6s linear infinite;
+            z-index: 50; pointer-events: none;
+        }
+        .orbit-item {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: orbit-counter-spin 6s linear infinite;
+        }
+    </style>
+</head>
+<body class="font-sans h-screen w-screen overflow-hidden flex items-center justify-center relative bg-gray-900">
+
+    <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-[9999]"></div>
+
+    <div id="start-screen-overlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-[65] flex flex-col items-center justify-center transition-opacity duration-500">
+        
+        <div class="flex items-center justify-center gap-12 mb-12 w-full px-10">
+            <!-- Hero Side -->
+            <div class="flex flex-col items-center animate-[float-breathe_4s_ease-in-out_infinite]">
+                <div class="w-56 h-56 rounded-full border-[10px] border-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.8)] overflow-hidden bg-blue-950 relative z-10">
+                    <img id="start-hero-avatar" src="https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO" alt="Hero" class="w-full h-full object-cover bg-white">
+                </div>
+                <h2 class="text-5xl font-black text-blue-400 mt-6 tracking-widest uppercase drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]">HERO</h2>
+            </div>
+
+            <!-- VS Icon -->
+            <h1 class="text-[100px] font-black text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 via-white to-yellow-500 drop-shadow-[0_0_40px_rgba(250,204,21,0.8)] mx-4 animate-pulse uppercase italic z-20">VS</h1>
+
+            <!-- Boss Side -->
+            <div class="flex flex-col items-center animate-[float-breathe_4.5s_ease-in-out_infinite]">
+                <div class="w-56 h-56 rounded-[40px] border-[10px] border-red-600 shadow-[0_0_50px_rgba(220,38,38,0.8)] overflow-hidden bg-black relative z-10" id="start-boss-avatar-container">
+                    <!-- Boss iframe/image will go here -->
+                </div>
+                <h2 class="text-5xl font-black text-red-500 mt-6 tracking-widest uppercase drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">BOSS</h2>
+            </div>
+        </div>
+
+        <button id="btn-start-battle" class="px-16 py-6 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-600 hover:from-yellow-400 hover:via-orange-400 hover:to-red-500 text-white font-black text-5xl rounded-full shadow-[0_0_40px_rgba(245,158,11,0.8)] border-[6px] border-white transition-all transform hover:scale-110 active:scale-95 hover:shadow-[0_0_80px_rgba(245,158,11,1)] z-30">
+            ⚔️ START BATTLE ⚔️
+        </button>
+    </div>
+
+    <div id="game-container" class="absolute inset-0 z-0 flex w-full h-full bg-gradient-to-br from-[#1a0b2e] via-[#2d1b4e] to-[#0f172a] overflow-hidden">
+        
+        <div id="pause-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-sm z-[45] flex flex-col items-center justify-center hidden">
+            <div class="text-white font-black text-6xl tracking-widest text-shadow-lg drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] animate-pulse">
+                ⏸ PAUSED
+            </div>
+            <p class="text-yellow-300 text-xl font-bold mt-4 tracking-wider">Press Play to continue</p>
+        </div>
+
+        <div id="leaderboard-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-lg z-[9990] hidden flex items-center justify-center opacity-0 transition-opacity duration-1000">
+            <div class="bg-gradient-to-b from-blue-900 to-indigo-950 w-[700px] max-h-[90vh] rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.6)] border-4 border-yellow-400 p-8 text-center relative flex flex-col transform scale-90 transition-transform duration-700" id="leaderboard-box">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-screen pointer-events-none z-0 rounded-3xl"></div>
+                
+                <div id="lb-input-state" class="relative z-10 flex flex-col items-center w-full">
+                    <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-yellow-400 drop-shadow-lg mb-2 uppercase tracking-widest" id="lb-title">MATCH RESULT</h1>
+                    <p class="text-blue-200 text-lg font-bold mb-6" id="lb-subtitle">Analyzing performance...</p>
+
+                    <div class="w-32 h-32 rounded-full border-[6px] border-yellow-400 shadow-[0_0_30px_yellow] bg-blue-950 overflow-hidden mb-6 relative">
+                        <img id="lb-avatar" src="" alt="Winner Avatar" class="w-full h-full object-cover">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 w-full px-2 mb-6">
+                        <div class="bg-green-900/40 rounded-xl p-3 border border-green-400/50 backdrop-blur-sm text-center flex flex-col justify-center shadow-inner">
+                            <span class="text-green-300 font-bold text-sm">CORRECT</span>
+                            <span class="text-white font-black text-2xl" id="lb-correct">0</span>
+                        </div>
+                        <div class="bg-red-900/40 rounded-xl p-3 border border-red-400/50 backdrop-blur-sm text-center flex flex-col justify-center shadow-inner">
+                            <span class="text-red-300 font-bold text-sm">WRONG</span>
+                            <span class="text-white font-black text-2xl" id="lb-wrong">0</span>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-3 border border-white/20 backdrop-blur-sm text-center flex flex-col justify-center shadow-inner">
+                            <span class="text-cyan-300 font-bold text-sm">DMG DEALT</span>
+                            <span class="text-white font-black text-2xl" id="lb-time">0</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 p-4 rounded-2xl shadow-xl border-2 border-yellow-200 mb-6 animate-pulse">
+                        <div class="text-yellow-100 text-sm font-bold uppercase tracking-wider mb-1">TOTAL SCORE</div>
+                        <div class="text-6xl font-black text-white text-shadow-lg drop-shadow-md" id="lb-score">0</div>
+                    </div>
+
+                    <div class="w-full flex flex-col gap-3">
+                        <input type="text" id="lb-hero-name" placeholder="Enter your Hero name..." class="w-full p-4 rounded-xl border-2 border-blue-400 bg-blue-950/80 text-white font-bold text-xl text-center focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition placeholder-blue-400" maxlength="20">
+                        <button id="btn-save-score" class="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-black text-xl rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.6)] border-2 border-white transition transform hover:scale-[1.02] active:scale-[0.98]">
+                            SAVE SCORE & VIEW RANKING
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lb-board-state" class="relative z-10 hidden flex flex-col w-full h-full">
+                    <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-yellow-400 drop-shadow-lg mb-4 uppercase tracking-widest">HALL OF FAME</h1>
+                    
+                    <div class="flex-1 w-full bg-black/40 rounded-xl border-2 border-blue-400/50 backdrop-blur-md overflow-hidden mb-6 flex flex-col max-h-[450px]">
+                        <div class="w-full grid grid-cols-[10%_15%_35%_10%_10%_20%] gap-2 p-3 bg-blue-900/80 border-b border-blue-400/50 text-blue-200 font-bold text-sm uppercase tracking-wider shrink-0">
+                            <div>RANK</div>
+                            <div>HERO</div>
+                            <div class="text-left pl-2">NAME</div>
+                            <div title="Correct">✔️</div>
+                            <div title="Wrong">❌</div>
+                            <div>SCORE</div>
+                        </div>
+                        <div id="lb-list-container" class="w-full flex-1 overflow-y-auto overflow-x-hidden p-2 flex flex-col gap-2 relative"></div>
+                    </div>
+
+                    <div class="flex justify-between w-full gap-4 shrink-0">
+                        <button id="btn-export-csv" class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl border border-gray-400 transition shadow-md flex items-center justify-center gap-2">
+                            <span>📥</span> EXPORT CSV
+                        </button>
+                        <button id="btn-clear-lb" class="py-3 px-4 bg-red-900/80 hover:bg-red-800 text-red-200 font-bold rounded-xl border border-red-500 transition shadow-md flex items-center justify-center gap-2">
+                            🗑️ CLEAR
+                        </button>
+                        <button id="btn-lb-restart" class="flex-[2] py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-black text-xl rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.6)] border-2 border-white transition transform hover:scale-[1.02] active:scale-[0.98]">
+                            🔄 PLAY AGAIN
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="projectile-layer" class="absolute inset-0 pointer-events-none z-[100] overflow-hidden"></div>
+
+        <div class="w-2/3 h-full relative flex flex-col justify-between pt-6 px-6 pb-1 perspective-[1200px] z-[1] overflow-hidden">
+            
+            <div id="dynamic-bg-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-[-2] overflow-hidden" style="opacity: 0.4;"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-screen pointer-events-none z-[-1]"></div>
+
+            <div class="absolute top-4 right-4 bg-black/40 p-3 rounded-xl border border-gray-700/50 backdrop-blur-md z-20 flex flex-col items-center gap-2">
+                <div id="boss-skills-container" class="grid grid-cols-4 gap-2 w-[220px]"></div>
+                <div id="enrage-timer-display" class="text-orange-400 font-black text-sm tracking-widest bg-black/60 px-3 py-1 rounded-full border border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.5)] w-full text-center">
+                    ENRAGE IN: 03:00
+                </div>
+            </div>
+
+            <div class="relative w-full flex flex-col items-center mt-6 ml-8">
+                <div id="boss-wrapper-anim" class="relative animate-boss mt-4 transition-all duration-700">
+                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 w-64 h-10 bg-black/80 rounded-[100%] blur-xl"></div>
+                    
+                    <div class="relative pointer-events-auto z-10">
+                        <div id="boss-shield-bubble" class="absolute inset-[-15px] rounded-[32px] border-4 border-purple-400 bg-purple-300/30 shadow-[0_0_30px_purple] opacity-0 transition-opacity duration-300 pointer-events-none z-20"></div>
+                        <span id="boss-shield-text" class="absolute -top-3 -right-3 bg-purple-500 text-white text-xs font-black px-2 py-1 rounded-full border-2 border-white shadow-md z-30 transition-all duration-300 opacity-0 scale-50">0</span>
+                        <div id="boss-avatar-container" class="boss-avatar-wrapper w-64 h-64 flex items-center justify-center relative rounded-[32px] overflow-hidden border-8 border-red-500 transition-colors duration-500 shadow-[0_0_40px_rgba(0,0,0,0.6)] bg-white"></div>
+                    </div>
+
+                    <div id="boss-fx-container" class="absolute inset-0 pointer-events-none z-[60]"></div>
+                </div>
+                
+                <div class="w-[500px] mt-2 flex flex-col gap-2 z-10">
+                    <div class="h-10 bg-black/80 rounded-full border-2 border-gray-700 p-1 relative overflow-hidden shadow-2xl">
+                        <div id="boss-hp-bar" class="h-full w-[100%] bg-gradient-to-r from-red-900 via-red-600 to-red-500 rounded-full relative transition-all duration-300">
+                            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-20 mix-blend-overlay"></div>
+                        </div>
+                        <div id="boss-hp-text" class="absolute inset-0 flex items-center justify-center text-white font-black text-xl text-shadow tracking-widest drop-shadow-md">1000 / 1000</div>
+                    </div>
+                    <div class="flex items-center gap-2 mx-auto w-[450px]">
+                        <div id="boss-rage-icon" class="text-2xl drop-shadow-[0_0_5px_yellow] transition-all duration-300">💢</div>
+                        <div class="h-4 flex-1 bg-black/80 rounded-full border border-gray-800 p-[2px] relative overflow-hidden">
+                            <div id="boss-rage-bar" class="h-full w-[0%] bg-yellow-400 rounded-full shadow-[0_0_10px_yellow] transition-all duration-200"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative w-full h-[300px] flex justify-between items-end translate-y-3">
+                
+                <div id="thunder-hero-lock" class="absolute inset-0 bg-yellow-400/20 backdrop-blur-[2px] z-[55] hidden rounded-2xl flex flex-col items-center justify-center border-4 border-yellow-400 border-dashed">
+                    <span class="text-5xl font-black text-white animate-pulse drop-shadow-[0_0_20px_red] tracking-widest bg-red-600/80 px-6 py-2 rounded-xl border-2 border-white shadow-2xl">⚡ PARALYZED ⚡</span>
+                    <div class="flex gap-6 mt-6">
+                        <span class="text-5xl animate-bounce drop-shadow-md">⚡</span>
+                        <span class="text-5xl animate-bounce delay-100 drop-shadow-md text-yellow-300" style="animation-delay: 0.1s;">⚠️</span>
+                        <span class="text-5xl animate-bounce delay-200 drop-shadow-md" style="animation-delay: 0.2s;">⚡</span>
+                    </div>
+                </div>
+
+                <div class="flex items-end gap-5 z-20 h-full pb-4 mb-3 relative">
+                    <div class="w-12 h-[290px] bg-black/60 rounded-full border-[3px] border-gray-800 flex flex-col justify-end relative shadow-lg backdrop-blur-md overflow-hidden p-1 shrink-0">
+                        <div id="mana-fluid" class="absolute bottom-0 left-0 right-0 h-[0%] bg-gradient-to-t from-blue-800 via-blue-500 to-teal-400 shadow-[0_0_20px_teal] rounded-full z-0 transition-all duration-500">
+                            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+                        </div>
+                        <div class="absolute top-[25%] left-0 w-full flex flex-col items-center font-black text-white text-base tracking-widest text-shadow z-20 pointer-events-none">
+                            <span id="current-mana-text">0</span>
+                            <div class="w-5 h-[2px] bg-white/60 my-1 rounded"></div>
+                            <span class="text-gray-300">10</span>
+                        </div>
+                        <div class="relative w-9 h-9 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center text-lg z-20 shadow-[0_0_15px_yellow] border border-yellow-200 mt-auto mx-auto mb-1">⚡</div>
+                    </div>
+
+                    <div id="hero-skills-container" class="grid grid-flow-col grid-rows-4 p-2 mb-1 ml-2 content-start h-[290px] overflow-visible w-[200px] -translate-x-6"></div>
+                </div>
+
+                <div class="absolute left-1/2 bottom-0 transform -translate-x-1/2 flex flex-col items-center z-10 w-full pointer-events-none pb-4 ml-8 translate-y-7" id="hero-core-wrapper">
+                    
+                    <div class="relative flex items-center justify-center mb-6">
+                        <div class="absolute w-[340px] h-[340px] border-[6px] border-yellow-400/50 rounded-full border-dashed animate-aura z-0">
+                            <div class="absolute inset-6 border-[4px] border-yellow-200/30 rounded-full border-dotted"></div>
+                        </div>
+
+                        <div class="absolute -left-[106px] top-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto z-20 mt-5">
+                            <button id="btn-shield" class="basic-weapon-btn w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-full flex items-center justify-center text-4xl border-[4px] border-blue-300 shadow-[0_0_25px_rgba(59,130,246,0.6)] hover:scale-110 active:scale-95 transition-all group relative overflow-hidden">
+                                🛡️
+                                <div class="absolute top-0 left-[-100%] w-1/2 h-full bg-white/30 skew-x-[-20deg] group-hover:animate-[sweep_1s_ease-in-out]"></div>
+                            </button>
+                            <div id="ui-shield-text" class="mt-2 bg-blue-900/90 text-blue-200 font-black text-sm px-3 py-1 rounded-xl border border-blue-500 backdrop-blur-sm shadow-lg transition-all">+0 DEF</div>
+                        </div>
+
+                        <div class="relative pointer-events-auto z-10 transition-all duration-700" id="hero-anim-box">
+                            <div id="hero-shield-bubble" class="absolute inset-[-15px] rounded-full border-4 border-cyan-400 bg-cyan-300/30 shadow-[0_0_30px_cyan] opacity-0 transition-opacity duration-300 pointer-events-none z-20"></div>
+                            <span id="hero-shield-text" class="absolute -top-3 -right-3 bg-cyan-500 text-white text-xs font-black px-2 py-1 rounded-full border-2 border-white shadow-md z-30 transition-all duration-300 opacity-0 scale-50">0</span>
+                            
+                            <div id="hero-win-props" class="absolute left-1/2 top-0 z-[80] flex flex-col items-center justify-center pointer-events-none opacity-0">
+                                <div class="absolute text-[110px] drop-shadow-[0_0_25px_rgba(255,215,0,0.8)] z-0">⚔️</div>
+                                <div class="absolute text-[75px] drop-shadow-[0_0_20px_rgba(59,130,246,0.9)] z-10 transform translate-y-3">🛡️</div>
+                            </div>
+
+                            <div id="hero-avatar-wrapper" class="w-44 h-44 rounded-full border-[8px] border-edVang overflow-hidden shadow-[0_0_40px_rgba(246,201,14,0.6)] bg-blue-950 flex items-center justify-center transition-all duration-700 relative z-10">
+                                <img id="main-hero-avatar" src="https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO" alt="Hero Avatar" class="w-full h-full object-cover bg-white">
+                            </div>
+                        </div>
+                        
+                        <div id="hero-fx-container" class="absolute inset-0 pointer-events-none z-[60]"></div>
+
+                        <div class="absolute -right-[106px] top-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto z-20 mt-5">
+                            <button id="btn-bow" class="basic-weapon-btn w-20 h-20 bg-gradient-to-br from-orange-500 to-red-800 rounded-full flex items-center justify-center text-4xl border-[4px] border-orange-300 shadow-[0_0_25px_rgba(249,115,22,0.6)] hover:scale-110 active:scale-95 transition-all group relative overflow-hidden">
+                                🏹
+                                <div class="absolute top-0 left-[-100%] w-1/2 h-full bg-white/30 skew-x-[-20deg] group-hover:animate-[sweep_1s_ease-in-out]"></div>
+                            </button>
+                            <div id="ui-bow-text" class="mt-2 bg-red-900/90 text-red-200 font-black text-sm px-3 py-1 rounded-xl border border-red-500 backdrop-blur-sm shadow-lg transition-all">-0 DMG</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-4 w-[500px] relative z-20 pointer-events-auto -translate-y-[14px]">
+                        <div class="text-red-500 text-4xl drop-shadow-[0_0_10px_red] shrink-0 animate-pulse">❤️</div>
+                        
+                        <div class="flex-1 h-8 rounded-full overflow-hidden relative shadow-[0_5px_15px_rgba(0,0,0,0.4)] backdrop-blur-sm bg-black/40">
+                            <div id="hero-hp-bar" class="w-[100%] h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-300"></div>
+                            <span id="hero-hp-text" class="absolute inset-0 flex items-center justify-center text-white font-black text-lg text-shadow tracking-wider">100 / 100</span>
+                        </div>
+                        
+                        <div class="relative flex items-center shrink-0">
+                            <button id="btn-heal" class="basic-weapon-btn w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-[0_0_20px_rgba(34,197,94,0.7)] hover:scale-110 active:scale-95 transition-all cursor-pointer border-[3px] border-green-200/50">
+                                ✚
+                            </button>
+                            <div id="ui-heal-text" class="absolute left-full ml-2 bg-green-900/90 text-green-200 font-black text-sm px-3 py-1 rounded-xl border border-green-500 backdrop-blur-sm shadow-lg whitespace-nowrap transition-all opacity-0 pointer-events-none">+0 HP</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-2 h-full bg-white/10 backdrop-blur-2xl shadow-[-10px_0_30px_rgba(0,0,0,0.6)] z-30 relative flex items-center justify-center">
+            <div class="w-4 h-24 bg-white/30 rounded-full blur-[2px]"></div>
+        </div>
+
+        <div class="w-1/3 h-full bg-black/30 backdrop-blur-md p-4 flex flex-col justify-between gap-4 z-40 relative">
+            
+            <div id="thunder-card-lock" class="absolute inset-0 bg-yellow-400/20 backdrop-blur-[2px] z-[65] hidden flex flex-col items-center justify-center rounded-2xl border-4 border-yellow-400 border-dashed mx-2 my-2">
+                <span class="text-5xl font-black text-white animate-pulse drop-shadow-[0_0_20px_red] tracking-widest bg-red-600/80 px-6 py-2 rounded-xl border-2 border-white shadow-2xl text-center">⚡ PARALYZED ⚡</span>
+                <div class="flex gap-6 mt-6">
+                    <span class="text-6xl animate-bounce drop-shadow-md">⚡</span>
+                    <span class="text-6xl animate-bounce delay-100 drop-shadow-md text-yellow-300" style="animation-delay: 0.1s;">⚠️</span>
+                    <span class="text-6xl animate-bounce delay-200 drop-shadow-md" style="animation-delay: 0.2s;">⚡</span>
+                </div>
+            </div>
+
+            <div id="card-wrapper-1" class="flex-1 min-h-0 bg-edKem rounded-[20px] flex items-stretch relative shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-[4px] border-blue-500 transition-transform duration-300 card-wrapper pl-6 hidden">
+                <div class="absolute -left-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-50">
+                    <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-black shadow-lg border-[3px] border-edKem">1</div>
+                    <button class="reroll-btn w-12 h-12 bg-edVang hover:bg-yellow-400 text-edNavy rounded-full flex items-center justify-center transition-transform duration-500 hover:rotate-180 shadow-lg border-[3px] border-edKem cursor-pointer" data-card="1" title="Phạt: Trừ 1 Mana & Đổi thẻ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+                <div class="card-clickable flex-1 min-h-0 flex flex-col p-1.5 h-full overflow-hidden card-content-container cursor-pointer hover:bg-blue-50/50 transition-colors rounded-r-[16px]" data-card="1">
+                    <div class="w-full flex-[3] min-h-0 rounded-xl border-[2px] border-blue-300 flex items-center justify-center bg-white overflow-hidden shadow-sm card-img-box relative transition-all duration-300 mb-1.5">
+                        <img id="card-1-img" src="https://placehold.co/500x300/cbd5e1/475569?text=Empty" class="w-full h-full object-contain p-1">
+                    </div>
+                    <div class="w-full flex-[1] min-h-0 flex items-center justify-center overflow-hidden px-2 card-txt-box transition-all duration-300">
+                        <p id="card-1-txt" class="text-3xl 2xl:text-4xl font-black text-edNavy text-center leading-tight break-words line-clamp-3">...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="card-wrapper-2" class="flex-1 min-h-0 bg-edKem rounded-[20px] flex items-stretch relative shadow-[0_8px_25px_rgba(0,0,0,0.4)] border-[4px] border-emerald-500 transition-transform duration-300 card-wrapper pl-6 hidden">
+                <div class="absolute -left-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-50">
+                    <div class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-black shadow-lg border-[3px] border-edKem">2</div>
+                    <button class="reroll-btn w-12 h-12 bg-edVang hover:bg-yellow-400 text-edNavy rounded-full flex items-center justify-center transition-transform duration-500 hover:rotate-180 shadow-lg border-[3px] border-edKem cursor-pointer" data-card="2" title="Phạt: Trừ 1 Mana & Đổi thẻ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+                <div class="card-clickable flex-1 min-h-0 flex flex-col p-1.5 h-full overflow-hidden card-content-container cursor-pointer hover:bg-emerald-50/50 transition-colors rounded-r-[16px]" data-card="2">
+                    <div class="w-full flex-[3] min-h-0 rounded-xl border-[2px] border-emerald-300 flex items-center justify-center bg-white overflow-hidden shadow-sm card-img-box relative transition-all duration-300 mb-1.5">
+                        <img id="card-2-img" src="https://placehold.co/500x300/cbd5e1/475569?text=Empty" class="w-full h-full object-contain p-1">
+                    </div>
+                    <div class="w-full flex-[1] min-h-0 flex items-center justify-center overflow-hidden px-2 card-txt-box transition-all duration-300">
+                        <p id="card-2-txt" class="text-3xl 2xl:text-4xl font-black text-emerald-900 text-center leading-tight break-words line-clamp-3">...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="card-wrapper-3" class="flex-1 min-h-0 bg-edKem rounded-[20px] flex items-stretch relative shadow-[0_8px_25px_rgba(0,0,0,0.4)] border-[4px] border-purple-500 transition-transform duration-300 card-wrapper pl-6 hidden">
+                <div class="absolute -left-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-50">
+                    <div class="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center text-2xl font-black shadow-lg border-[3px] border-edKem">3</div>
+                    <button class="reroll-btn w-12 h-12 bg-edVang hover:bg-yellow-400 text-edNavy rounded-full flex items-center justify-center transition-transform duration-500 hover:rotate-180 shadow-lg border-[3px] border-edKem cursor-pointer" data-card="3" title="Phạt: Trừ 1 Mana & Đổi thẻ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+                <div class="card-clickable flex-1 min-h-0 flex flex-col p-1.5 h-full overflow-hidden card-content-container cursor-pointer hover:bg-purple-50/50 transition-colors rounded-r-[16px]" data-card="3">
+                    <div class="w-full flex-[3] min-h-0 rounded-xl border-[2px] border-purple-300 flex items-center justify-center bg-white overflow-hidden shadow-sm card-img-box relative transition-all duration-300 mb-1.5">
+                        <img id="card-3-img" src="https://placehold.co/500x300/cbd5e1/475569?text=Empty" class="w-full h-full object-contain p-1">
+                    </div>
+                    <div class="w-full flex-[1] min-h-0 flex items-center justify-center overflow-hidden px-2 card-txt-box transition-all duration-300">
+                        <p id="card-3-txt" class="text-3xl 2xl:text-4xl font-black text-purple-900 text-center leading-tight break-words line-clamp-3">...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <button id="open-settings-btn" class="absolute top-4 left-4 p-3 bg-edVang hover:bg-edVangHover text-edNavy rounded-full shadow-ed-lg transition transform hover:scale-110 z-[80]" title="Cài Đặt Game">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+    </button>
+    
+    <button id="stop-game-btn" class="absolute top-4 left-20 p-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-ed-lg transition transform hover:scale-110 z-[80] hidden" title="Dừng Game">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h2V11h14l-3-4 3-4H5V3H3z" />
+        </svg>
+    </button>
+
+    <button id="pause-game-btn" class="absolute top-4 left-36 p-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow-ed-lg transition transform hover:scale-110 z-[80] flex items-center justify-center w-14 h-14 hidden" title="Tạm Dừng Game">
+        <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+        </svg>
+        <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+        </svg>
+    </button>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center opacity-0 pointer-events-none">
+        <div class="bg-edKem w-11/12 max-w-[1400px] h-[95vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border-4 border-edNavy transform transition-transform scale-95 duration-200" id="modal-content">
+            
+            <div class="bg-edNavy text-white px-6 py-4 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">⚙️</span>
+                    <h2 class="text-2xl font-bold uppercase tracking-wider text-edVang">Hệ Thống Cài Đặt</h2>
+                </div>
+                <button id="close-settings-btn" class="text-gray-300 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="flex px-6 pt-4 gap-2 bg-white border-b border-gray-200 shrink-0">
+                <button class="tab-btn active px-6 py-3 rounded-t-lg font-bold text-lg" data-target="tab-data">1. DATA</button>
+                <button class="tab-btn px-6 py-3 rounded-t-lg font-bold text-lg" data-target="tab-hero-boss">2. HERO & BOSS</button>
+                <button class="tab-btn px-6 py-3 rounded-t-lg font-bold text-lg text-teal-700" data-target="tab-skills">3. HERO & BOSS SKILLS</button>
+                <div class="flex-grow"></div>
+                <button id="save-and-close-btn" class="px-8 py-2 mb-2 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.5)] flex items-center gap-2 transition transform hover:scale-105 border-2 border-blue-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    SAVE & CLOSE
+                </button>
+            </div>
+
+            <div class="flex-grow overflow-hidden relative p-6 bg-edKem">
+                
+                <div id="tab-data" class="tab-content active h-full flex flex-col">
+                    <div class="flex flex-wrap gap-4 mb-4 items-start bg-white p-4 rounded-xl shadow-sm border border-gray-200 shrink-0">
+                        <div class="flex flex-col gap-2 border border-gray-300 rounded-lg p-2 bg-purple-50 shadow-sm border-l-4 border-l-purple-500 w-full lg:w-auto flex-1">
+                            <div class="flex items-center gap-2 w-full">
+                                <span class="font-bold text-purple-900 text-sm whitespace-nowrap">Chế độ chơi:</span>
+                                <select id="game-mode-select" class="p-1 border border-purple-300 rounded text-sm outline-none font-semibold text-purple-800 focus:ring-2 focus:ring-purple-500 bg-white w-full" data-save="game_mode">
+                                    <option value="mode1">1. Cuộc thi (Hết giỏ + Hết bàn -> End Game)</option>
+                                    <option value="mode2">2. Dò bài Random vô tận (Sai làm lại)</option>
+                                    <option value="mode3">3. Lặp vô tận + Theo thứ tự + Dò bài</option>
+                                    <option value="mode4">4. Theo thứ tự + Dò bài + End</option>
+                                </select>
+                            </div>
+                            <div class="w-full mt-1 p-3 bg-purple-100/50 border border-purple-200 rounded-lg text-sm text-purple-900 leading-relaxed shadow-inner" id="game-mode-description">
+                                <!-- Dynamic Description Goes Here -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center gap-2 border border-gray-300 rounded-lg p-2 bg-blue-50/50 shadow-sm">
+                                <span class="font-bold text-edNavy text-sm whitespace-nowrap">Giao diện Thẻ:</span>
+                                <select id="card-display-mode" class="p-1 border border-gray-300 rounded text-sm outline-none font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500 bg-white" data-save="card_display">
+                                    <option value="both">Cân đối (75% Hình + 25% Chữ)</option>
+                                    <option value="image">Chỉ hiển thị Hình Ảnh</option>
+                                    <option value="text">Chỉ hiển thị Văn Bản</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 border border-gray-300 rounded-lg p-2 bg-gray-50">
+                                <span class="font-bold text-edNavy text-sm">Auto ID:</span>
+                                <input type="number" id="auto-id-from" placeholder="Từ" class="w-16 p-1 border rounded text-center text-sm">
+                                <span>-</span>
+                                <input type="number" id="auto-id-to" placeholder="Đến" class="w-16 p-1 border rounded text-center text-sm">
+                                <button id="btn-auto-id" class="bg-edNavy hover:bg-edNavyLight text-white px-3 py-1 rounded text-sm font-semibold transition">Fill</button>
+                            </div>
+                        </div>
+                        
+                        <button id="btn-clear-data" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-1 ml-auto">
+                            Clear All
+                        </button>
+                    </div>
+
+                    <div class="table-container bg-white rounded-xl shadow-sm border border-gray-300 flex-grow relative">
+                        <table class="excel-table" id="data-grid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th style="width: 250px;" class="text-left">ID-IMAGE (images/...)</th>
+                                    <th style="width: auto;" class="text-left">TEXT (Câu hỏi)</th>
+                                    <th style="width: 150px;">
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span>PRIORITY</span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="grid-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-hero-boss" class="tab-content h-full overflow-y-auto pr-2 pb-10">
+                    <div class="bg-white rounded-2xl shadow-ed border-t-4 border-edNavy overflow-hidden mb-6">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-800 text-xl border-b-2 border-gray-300">
+                                    <th class="py-4 px-6 font-extrabold w-[25%] tracking-wide">📊 CHỈ SỐ</th>
+                                    <th class="py-4 px-6 font-extrabold w-[37.5%] text-blue-700 border-l border-gray-300 bg-blue-50/50">🥷 HERO</th>
+                                    <th class="py-4 px-6 font-extrabold w-[37.5%] text-red-700 border-l border-gray-300 bg-red-50/50">👹 BOSS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-base text-gray-800 divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">🎭 Ngoại Hình</td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20 align-top">
+                                        <div class="flex items-center gap-3 mb-1">
+                                            <input type="text" id="hero-avatar-id" data-save="hero_avatar_id" value="1" placeholder="ID" class="w-24 p-2 border border-blue-300 rounded font-bold focus:ring-2 focus:ring-blue-500 outline-none text-center">
+                                            <img id="hero-avatar-preview" src="https://placehold.co/40x40/e2e8f0/64748b?text=1" class="w-10 h-10 rounded-full border-2 border-blue-400 object-cover shadow-sm bg-white">
+                                        </div>
+                                        <span class="text-xs text-gray-500 italic">Ảnh tự quét từ thư mục Hero/ local (.png/.jpg)</span>
+                                    </td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20 align-top">
+                                        <div class="flex items-start gap-2 mb-2">
+                                            <input type="text" id="boss-theme-id" data-save="boss_theme_id" value="12582594" class="w-full p-2 border border-red-300 rounded font-bold text-center focus:ring-2 focus:ring-red-500 outline-none" placeholder="Tenor Link/ID hoặc Link Ảnh">
+                                        </div>
+                                        <div class="text-[11px] text-gray-600 bg-white p-2 rounded border border-red-200 shadow-inner leading-relaxed">
+                                            <strong class="text-red-700 block mb-1">📌 Hướng dẫn hiển thị Boss (Sửa lỗi dừng hình):</strong>
+                                            - <strong>Cách 1 (Link trực tiếp - Khuyên dùng 100%):</strong> Chuột phải vào GIF trên Tenor/Google -> Chọn <kbd class="bg-gray-100 px-1 border rounded">Sao chép địa chỉ hình ảnh</kbd>. Dán link đuôi .gif vào.<br>
+                                            - <strong>Cách 2 (Dùng ID Tenor):</strong> Copy ID số của Tenor.
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">🌌 Hình Nền (Background)</td>
+                                    <td colspan="2" class="py-4 px-6 border-l border-gray-200 bg-purple-50/20">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <input type="text" id="game-bg-id" data-save="game_bg_id" value="" class="flex-1 p-2 border border-purple-300 rounded font-bold text-center focus:ring-2 focus:ring-purple-500 outline-none bg-white" placeholder="Nhập Link Ảnh (.jpg, .png, .gif) hoặc Tenor Link/ID để đổi nền">
+                                            <div class="flex items-center gap-1 bg-white p-2 rounded border border-purple-300 shadow-sm shrink-0">
+                                                <span class="text-xs font-bold text-purple-900">Độ mờ:</span>
+                                                <input type="number" id="game-bg-opacity" data-save="game_bg_opacity" value="40" min="0" max="100" class="w-12 text-center font-bold text-purple-700 outline-none border-b border-purple-200 focus:border-purple-500">
+                                                <span class="text-xs font-bold text-purple-700">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">❤️ Max HP</td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20">
+                                        <input type="number" id="hero-max-hp" data-save="hero_max_hp" value="100" class="w-24 p-2 border border-blue-300 rounded font-black text-blue-700 text-center focus:ring-2 focus:ring-blue-500 outline-none text-lg">
+                                    </td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20">
+                                        <input type="number" id="boss-max-hp" data-save="boss_max_hp" value="1000" class="w-24 p-2 border border-red-300 rounded font-black text-red-700 text-center focus:ring-2 focus:ring-red-500 outline-none text-lg">
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">⚔️ DMG / DEF cơ bản</td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20">
+                                        <div class="bg-white p-3 rounded border border-blue-200 shadow-sm flex flex-col gap-2">
+                                            <div class="text-xs font-bold text-blue-800 uppercase border-b border-blue-100 pb-1">Hệ Số Quy Đổi (1 Mana =)</div>
+                                            <div class="flex flex-col gap-1.5">
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">ATK 🏹</span><input type="number" id="hero-mana-atk" data-save="hero_mana_atk" value="10" class="w-16 p-1 text-center border rounded font-bold text-orange-600 outline-none"></div>
+                                            </div>
+                                            <div class="flex flex-col gap-1.5">
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">DEF 🛡️</span><input type="number" id="hero-mana-def" data-save="hero_mana_def" value="5" class="w-12 p-1 text-center border rounded font-bold text-blue-600 outline-none"></div>
+                                                <div class="flex items-center justify-between mt-1"><span class="text-xs font-bold text-gray-600">Max Shield:</span><input type="number" id="hero-max-shield" data-save="hero_max_shield" value="50" class="w-12 p-1 text-center border rounded font-bold text-purple-600 outline-none"></div>
+                                            </div>
+                                            <div class="flex flex-col gap-1.5 border-t border-blue-100 pt-1.5 mt-0.5">
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">HEAL ✚</span><input type="number" id="hero-mana-heal" data-save="hero_mana_heal" value="15" class="w-16 p-1 text-center border rounded font-bold text-green-600 outline-none"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20">
+                                        <div class="flex flex-col gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-sm font-bold text-gray-700 w-32">Normal Attack ☄️:</span>
+                                                <input type="number" id="boss-normal-dmg" data-save="boss_normal_dmg" value="20" class="w-16 p-2 border border-red-300 rounded text-center font-bold text-red-600 focus:ring-2 focus:ring-red-500 outline-none">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">💢 Tốc độ Cuồng Nộ</td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20 text-center text-gray-400 font-bold bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')]">
+                                        <span class="bg-white px-2 py-1 rounded shadow-sm border border-gray-200">Không có (0)</span>
+                                    </td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xl">⏱️</span>
+                                            <input type="number" id="boss-rage-time" data-save="boss_rage_time" value="15" class="w-16 p-2 border border-red-300 rounded text-center font-bold text-orange-600 focus:ring-2 focus:ring-red-500 outline-none">
+                                            <span class="text-sm font-bold text-gray-600">giây</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-red-700">🔥 Cơ chế Hủy Diệt (Sudden Death)</td>
+                                    <td colspan="2" class="py-4 px-6 border-l border-gray-200 bg-orange-50/20">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex items-center gap-2 bg-white p-2 rounded border border-orange-300 shadow-sm">
+                                                <span class="text-xs font-bold text-orange-900">Kích hoạt sau:</span>
+                                                <input type="number" id="sudden-death-time" data-save="sudden_death_time" value="3" min="1" class="w-12 text-center font-bold text-orange-700 outline-none border-b border-orange-200 focus:border-orange-500">
+                                                <span class="text-xs font-bold text-orange-700">phút</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 bg-white p-2 rounded border border-red-300 shadow-sm">
+                                                <span class="text-xs font-bold text-red-900">Tăng Sức Mạnh Boss:</span>
+                                                <input type="number" id="sudden-death-buff" data-save="sudden_death_buff" value="200" min="100" step="50" class="w-16 text-center font-bold text-red-700 outline-none border-b border-red-200 focus:border-red-500">
+                                                <span class="text-xs font-bold text-red-700">%</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-2">Sau thời gian này, Boss sẽ <strong class="text-red-600">Đánh Đau Hơn</strong> và <strong class="text-red-600">Hồi Nộ Nhanh Hơn</strong> theo tỷ lệ phần trăm (Tránh việc Hero câu giờ hồi máu quá lâu).</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-skills" class="tab-content h-full overflow-y-auto pr-2 pb-10">
+                    <div class="mb-4 flex justify-between items-end bg-gradient-to-r from-teal-50 to-blue-50 border-l-4 border-teal-500 p-4 rounded-xl shadow-sm">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-teal-900 mb-1 flex items-center gap-2">
+                                💧 BỘ BÀI HERO (POTIONS)
+                                <span class="text-xs text-teal-800 bg-teal-200 px-2 py-1 rounded-full font-bold uppercase tracking-wider">- Tốn 5 Mana/Lần</span>
+                            </h3>
+                            <p class="text-sm text-gray-700 font-medium">Nhập <span class="text-red-600 font-bold">QTY = 0</span> để vô hiệu hóa thẻ khỏi Bộ Bài.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow border border-gray-300 overflow-hidden mb-8">
+                        <table class="w-full text-left border-collapse table-fixed bg-white">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-teal-800 to-teal-700 text-white text-sm uppercase tracking-wider border-b border-teal-900">
+                                    <th class="py-3 px-4 font-bold w-[25%] border-r border-teal-900 text-center">Tên Potion</th>
+                                    <th class="py-3 px-4 font-bold w-[45%] border-r border-teal-900 text-center">Mô Tả Hiệu Ứng</th>
+                                    <th class="py-3 px-4 font-bold w-[20%] border-r border-teal-900 text-center">Thông Số</th>
+                                    <th class="py-3 px-4 font-black w-[10%] text-yellow-300 text-center">QTY</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-gray-800">
+                                <tr class="hover:bg-teal-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-teal-900"><div class="flex items-center gap-2">🔥 Fireball</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Cầu lửa cực đại. Trừ HP & Đốt Nộ Boss về 0.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-teal-600 font-bold mb-1">DMG</div><input type="number" value="50" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white shadow-inner" data-save="h_s3_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-teal-50/50"><input type="number" value="1" class="hero-qty-input w-16 p-1.5 border-2 border-teal-400 rounded text-center font-black text-teal-700 outline-none focus:ring-2 focus:ring-teal-500 shadow-sm bg-white" data-save="h_s3_qty"></td>
+                                </tr>
+                                <tr class="hover:bg-teal-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-teal-900"><div class="flex items-center gap-2">⚡ Double Strike</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Glow vàng nút Cung. Bắn cung phát tới nhân X DMG & X mũi tên.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-teal-600 font-bold mb-1">Hệ số (x)</div><input type="number" value="2" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white shadow-inner" data-save="h_s5_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-teal-50/50"><input type="number" value="2" class="hero-qty-input w-16 p-1.5 border-2 border-teal-400 rounded text-center font-black text-teal-700 outline-none focus:ring-2 focus:ring-teal-500 shadow-sm bg-white" data-save="h_s5_qty"></td>
+                                </tr>
+                                <tr class="hover:bg-teal-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-teal-900"><div class="flex items-center gap-2">❄️ Freeze</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Ném người tuyết. Đóng băng thanh Nộ Boss trong X giây.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-teal-600 font-bold mb-1">Thời gian (s)</div><input type="number" value="5" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white shadow-inner" data-save="h_s1_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-teal-50/50"><input type="number" value="2" class="hero-qty-input w-16 p-1.5 border-2 border-teal-400 rounded text-center font-black text-teal-700 outline-none focus:ring-2 focus:ring-teal-500 shadow-sm bg-white" data-save="h_s1_qty"></td>
+                                </tr>
+                                <tr class="hover:bg-teal-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-teal-900"><div class="flex items-center gap-2">☄️ Meteor Shower</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Mưa 15 thiên thạch giáng xuống Boss (Chậm & rõ ràng).</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-teal-600 font-bold mb-1">DMG / Hit</div><input type="number" value="5" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white shadow-inner" data-save="h_s7_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-teal-50/50"><input type="number" value="1" class="hero-qty-input w-16 p-1.5 border-2 border-teal-400 rounded text-center font-black text-teal-700 outline-none focus:ring-2 focus:ring-teal-500 shadow-sm bg-white" data-save="h_s7_qty"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mb-4 flex justify-between items-end bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-red-900 mb-1 flex items-center gap-2">
+                                👹 BỘ BÀI BOSS (SKILLS)
+                                <span class="text-xs text-red-800 bg-red-200 px-2 py-1 rounded-full font-bold uppercase tracking-wider">- Tự động bốc</span>
+                            </h3>
+                            <p class="text-sm text-gray-700 font-medium">Bình thường mờ 50%. Khi bắt đầu Nộ sẽ <strong class="text-red-600">Random sáng 1 Skill báo hiệu</strong>.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow border border-gray-300 overflow-hidden">
+                        <table class="w-full text-left border-collapse table-fixed bg-white">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-red-900 to-red-800 text-white text-sm uppercase tracking-wider border-b border-red-950">
+                                    <th class="py-3 px-4 font-bold w-[25%] border-r border-red-950 text-center">Tên Kỹ Năng</th>
+                                    <th class="py-3 px-4 font-bold w-[45%] border-r border-red-950 text-center">Mô Tả Hiệu Ứng</th>
+                                    <th class="py-3 px-4 font-bold w-[20%] border-r border-red-950 text-center">Thông Số</th>
+                                    <th class="py-3 px-4 font-black w-[10%] text-yellow-300 text-center">QTY</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-gray-800">
+                                <tr class="hover:bg-red-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-red-900"><div class="flex items-center gap-2">🍔 Junk Food Attack</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Mưa đồ ăn nhanh ném thẳng vào Hero (Mặc định 5 hit).</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-red-600 font-bold mb-1">DMG / Hit</div><input type="number" value="10" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-red-500 bg-white shadow-inner" data-save="b_s1_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-red-50/50"><input type="number" value="10" class="boss-qty-input w-16 p-1.5 border-2 border-red-400 rounded text-center font-black text-red-700 outline-none focus:ring-2 focus:ring-red-500 shadow-sm bg-white" data-save="b_s1_qty"></td>
+                                </tr>
+                                <tr class="hover:bg-red-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-red-900"><div class="flex items-center gap-2">⚡ Thunder Strike</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Rùa bò tới Hero -> Sét đánh chớp màn hình. Tê liệt toàn tập.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-red-600 font-bold mb-1">Tê liệt (s)</div><input type="number" value="4" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-red-500 bg-white shadow-inner" data-save="b_s6_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-red-50/50"><input type="number" value="2" class="boss-qty-input w-16 p-1.5 border-2 border-red-400 rounded text-center font-black text-red-700 outline-none focus:ring-2 focus:ring-red-500 shadow-sm bg-white" data-save="b_s6_qty"></td>
+                                </tr>
+                                <tr class="hover:bg-red-50 transition border-b border-gray-200">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-red-900"><div class="flex items-center gap-2">🌀 Confusion</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Phun vòng xoáy vào thẻ bài. 3 lá bài lộn xộn, khó bấm.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><div class="text-[10px] text-red-600 font-bold mb-1">Thời gian (s)</div><input type="number" value="5" class="w-16 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-red-500 bg-white shadow-inner" data-save="b_s8_v1"></td>
+                                    <td class="py-2 px-4 text-center bg-red-50/50"><input type="number" value="2" class="boss-qty-input w-16 p-1.5 border-2 border-red-400 rounded text-center font-black text-red-700 outline-none focus:ring-2 focus:ring-red-500 shadow-sm bg-white" data-save="b_s8_qty"></td>
+                                </tr>
+                                <tr class="hover:bg-red-50 transition">
+                                    <td class="py-2 px-4 border-r border-gray-200 font-bold text-red-900"><div class="flex items-center gap-2">💤 Rest & Heal</div></td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-sm font-medium text-gray-600">Ngủ tạo Giáp. Hết giờ Giáp còn dư -> Chuyển thành Máu.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <div class="flex flex-col"><div class="text-[9px] text-purple-600 font-bold">Lượng Giáp</div><input type="number" value="100" class="w-12 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-inner" data-save="b_s9_v1"></div>
+                                            <div class="flex flex-col"><div class="text-[9px] text-orange-600 font-bold">Thời gian (s)</div><input type="number" value="5" class="w-12 p-1 border border-gray-300 rounded text-center font-bold outline-none focus:ring-2 focus:ring-orange-500 bg-white shadow-inner" data-save="b_s9_v2"></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 px-4 text-center bg-red-50/50"><input type="number" value="2" class="boss-qty-input w-16 p-1.5 border-2 border-red-400 rounded text-center font-black text-red-700 outline-none focus:ring-2 focus:ring-red-500 shadow-sm bg-white" data-save="b_s9_qty"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <div id="custom-alert-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[999999] hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-edNavy transform transition-all scale-95" id="custom-alert-box">
+            <div class="text-5xl mb-4" id="custom-alert-icon">⚠️</div>
+            <h3 class="text-2xl font-black text-edNavy mb-2" id="custom-alert-title">Thông Báo</h3>
+            <p class="text-gray-700 font-semibold mb-6 text-lg" id="custom-alert-msg">Nội dung...</p>
+            <div class="flex justify-center gap-4" id="custom-alert-buttons"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            function showCustomAlert(message, type = 'alert', onConfirm = null) {
+                const overlay = document.getElementById('custom-alert-overlay');
+                const title = document.getElementById('custom-alert-title');
+                const msg = document.getElementById('custom-alert-msg');
+                const icon = document.getElementById('custom-alert-icon');
+                const buttons = document.getElementById('custom-alert-buttons');
+                const box = document.getElementById('custom-alert-box');
+                
+                overlay.classList.remove('hidden');
+                setTimeout(() => box.classList.replace('scale-95', 'scale-100'), 10);
+                
+                msg.textContent = message;
+                buttons.innerHTML = '';
+                
+                if (type === 'confirm') {
+                    title.textContent = 'Xác Nhận';
+                    title.className = 'text-2xl font-black text-yellow-600 mb-2';
+                    icon.textContent = '🤔';
+                    
+                    const btnYes = document.createElement('button');
+                    btnYes.className = 'px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition';
+                    btnYes.textContent = 'Đồng Ý';
+                    btnYes.onclick = () => { closeCustomAlert(); if(onConfirm) onConfirm(); };
+                    
+                    const btnNo = document.createElement('button');
+                    btnNo.className = 'px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white font-bold rounded-lg shadow-md transition';
+                    btnNo.textContent = 'Hủy Bỏ';
+                    btnNo.onclick = closeCustomAlert;
+                    
+                    buttons.appendChild(btnNo);
+                    buttons.appendChild(btnYes);
+                } else {
+                    title.textContent = 'Cảnh Báo';
+                    title.className = 'text-2xl font-black text-red-600 mb-2';
+                    icon.textContent = '⚠️';
+                    
+                    const btnOk = document.createElement('button');
+                    btnOk.className = 'px-6 py-2 bg-edNavy hover:bg-edNavyLight text-white font-bold rounded-lg shadow-md transition';
+                    btnOk.textContent = 'Đã Hiểu';
+                    btnOk.onclick = closeCustomAlert;
+                    buttons.appendChild(btnOk);
+                }
+            }
+            
+            function closeCustomAlert() {
+                const overlay = document.getElementById('custom-alert-overlay');
+                const box = document.getElementById('custom-alert-box');
+                box.classList.replace('scale-100', 'scale-95');
+                setTimeout(() => overlay.classList.add('hidden'), 200);
+            }
+
+            const SFX = {
+                ctx: null,
+                init() {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                },
+                play(freq, type, dur, slideFreq=null, vol=0.1) {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    if(slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, this.ctx.currentTime + dur);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + dur);
+                },
+                ting() { this.play(880, 'sine', 0.1); setTimeout(()=>this.play(1760, 'sine', 0.3), 100); },
+                error() { this.play(150, 'sawtooth', 0.3); setTimeout(()=>this.play(150, 'sawtooth', 0.4), 200); },
+                heal() { [400, 500, 600, 800].forEach((f, i) => setTimeout(()=>this.play(f, 'sine', 0.2), i*80)); },
+                hit() { this.play(100, 'square', 0.2, 40, 0.2); },
+                shield() { this.play(200, 'sine', 0.5, 600, 0.2); },
+                charge() { this.play(100, 'sine', 1.5, 800, 0.2); },
+                shoot() { this.play(800, 'square', 0.2, 100, 0.1); },
+                win() { [300, 400, 500, 600, 800].forEach((f, i) => setTimeout(()=>this.play(f, 'square', 0.2), i*150)); setTimeout(()=>this.play(1000, 'square', 0.6), 800); },
+                lose() { [300, 250, 200, 150].forEach((f, i) => setTimeout(()=>this.play(f, 'sawtooth', 0.4), i*200)); },
+                freeze() { this.play(1200, 'triangle', 0.1); setTimeout(()=>this.play(1500, 'sine', 0.4), 100); },
+                meteor() { this.play(300, 'sawtooth', 0.3, 50, 0.1); },
+                thunder() { this.play(50, 'sawtooth', 1.0, 20, 0.3); setTimeout(()=>this.play(100, 'square', 0.5, 30, 0.2), 200); },
+                confusion() { this.play(400, 'sine', 0.8, 800, 0.1); setTimeout(()=>this.play(800, 'sine', 0.8, 400, 0.1), 800); },
+                bossHeal() { [300, 400, 500, 600].forEach((f, i) => setTimeout(() => this.play(f, 'square', 0.2, f+50, 0.1), i * 100)); }
+            };
+
+            function playTingSound() { SFX.ting(); }
+            function playErrorSound() { SFX.error(); }
+            function playHealSound() { SFX.heal(); }
+            function playHitSound() { SFX.hit(); }
+            function playShieldSound() { SFX.shield(); }
+            function playChargeSound() { SFX.charge(); }
+            function playShootSound() { SFX.shoot(); }
+            function playWinSound() { SFX.win(); }
+            function playLoseSound() { SFX.lose(); }
+            function playFreezeSound() { SFX.freeze(); }
+            function playMeteorSound() { SFX.meteor(); }
+            function playThunderSound() { SFX.thunder(); }
+            function playConfusionSound() { SFX.confusion(); }
+
+            function spawnFloatingText(containerId, text, colorClass) {
+                const container = document.getElementById(containerId);
+                if(!container) return;
+                const el = document.createElement('div');
+                el.className = `emoji-float ${colorClass} font-black text-shadow drop-shadow-lg`;
+                el.innerHTML = text;
+                el.style.left = `${Math.random() * 60 + 20}%`;
+                el.style.top = '0px';
+                container.appendChild(el);
+                setTimeout(() => el.remove(), 1200);
+            }
+
+            function triggerDamage(target) { 
+                const avatar = target === 'boss' ? document.getElementById('boss-avatar-container') : document.getElementById('hero-avatar-wrapper');
+                if(!avatar) return;
+                
+                playHitSound(); 
+                avatar.classList.add('shake-hard');
+                setTimeout(() => avatar.classList.remove('shake-hard'), 500);
+
+                const fxContainer = `${target}-fx-container`;
+                const hurtEmojis = ['😭', '😢', '💥', '💦', '😵'];
+                
+                for(let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const randomEmoji = hurtEmojis[Math.floor(Math.random() * hurtEmojis.length)];
+                        spawnFloatingText(fxContainer, randomEmoji, 'text-red-500 text-4xl');
+                    }, i * 150 + Math.random() * 100);
+                }
+            }
+
+            function triggerHeal(target, amount) {
+                const avatar = target === 'boss' ? document.getElementById('boss-avatar-container') : document.getElementById('hero-avatar-wrapper');
+                if(!avatar) return;
+                
+                target === 'boss' ? SFX.bossHeal() : playHealSound(); 
+                
+                avatar.classList.add('heal-bounce');
+                setTimeout(() => avatar.classList.remove('heal-bounce'), 800);
+
+                const fxContainer = `${target}-fx-container`;
+                const healHTML = `
+                    <div class="flex items-center gap-1">
+                        <span class="text-5xl drop-shadow-lg z-10">${target === 'boss' ? '😈' : '😄'}</span>
+                        <div class="relative flex items-center justify-center -ml-3 z-0">
+                            <span class="text-[70px] text-white drop-shadow-xl leading-none">💬</span>
+                            <span class="absolute text-green-600 text-2xl font-black drop-shadow-sm -mt-2">+${amount}</span>
+                        </div>
+                    </div>
+                `;
+                spawnFloatingText(fxContainer, healHTML, '');
+            }
+
+            let isGameStarted = false; 
+            let isGamePaused = false;
+            let isGameOver = false; 
+            let isEnraged = false; 
+            let suddenDeathTimerSec = 180;
+            let suddenDeathBuffMult = 2;
+            let gameTimerInterval = null;
+
+            const MAX_MANA = 10;
+            let currentMana = 0;
+            let activeCards = [null, null, null]; 
+            
+            let heroMaxHp = 100;
+            let currentHeroHp = 100;
+            let currentHeroShield = 0;
+            let heroMaxShield = 50;
+            let bossMaxHp = 1000;
+            let currentBossHp = 1000;
+            
+            let gameStats = { correct: 0, wrong: 0, dmg: 0, shield: 0, heal: 0 };
+            
+            let validCards = [];     
+            let availableCards = []; 
+            let wrongCards = [];     
+            let currentGameMode = "mode1";
+
+            const HERO_SKILL_ICONS = { h_s1: '❄️', h_s3: '🔥', h_s5: '⚡', h_s7: '☄️' };
+            let sessionHeroSkills = []; 
+            let activeSkillsOnBoard = []; 
+
+            let initialBossDeck = [];
+            let currentBossDeck = [];
+            let nextBossSkillId = null;
+            const BOSS_SKILL_ICONS = { b_s1: '🍔', b_s6: '⚡', b_s8: '🌀', b_s9: '💤' }; 
+            const BOSS_BORDER_COLORS = ['border-red-500', 'border-blue-500', 'border-green-500', 'border-purple-500', 'border-yellow-500', 'border-pink-500', 'border-teal-500', 'border-orange-500'];
+
+            let isDoubleStrikeActive = false;
+            let isBossFrozen = false;
+            let isHeroParalyzed = false;
+            
+            let isBossSleeping = false;
+            let currentBossShield = 0;
+            let bossSleepTimer = null;
+            let bossZzzInterval = null;
+
+            // Handle Mode Descriptions
+            const modeDescriptions = {
+                mode1: `<strong>1. Cuộc thi (Hết giỏ + Hết bàn -> End Game)</strong><br>
+                        • Cách ra thẻ: <strong>Ngẫu nhiên (Random)</strong>. Nếu trả lời sai, thẻ bị loại đi, trừ Mana và không lặp lại.<br>
+                        • Điều kiện kết thúc: Trận đấu tự động dừng khi <strong>không còn thẻ nào</strong> trên bàn VÀ trong giỏ.<br>
+                        • Phân định thắng thua: So sánh <strong>% HP còn lại</strong> của Hero và Boss. Nếu HP cạn về 0 giữa trận, game kết thúc ngay.`,
+                mode2: `<strong>2. Dò bài Random vô tận (Sai làm lại, hết vòng xáo tiếp)</strong><br>
+                        • Cách ra thẻ: <strong>Ngẫu nhiên (Random)</strong>. Sai đưa vào "Giỏ sai". Hết giỏ chính lấy "Giỏ sai" ra hỏi tiếp.<br>
+                        • Lặp vô tận: Đúng hết 100%, tự động nạp lại toàn bộ thẻ gốc, xáo trộn và chơi vòng mới.<br>
+                        • Điều kiện kết thúc: Game <strong>chỉ kết thúc</strong> khi HP của Boss hoặc Hero giảm về 0 (Tử chiến).`,
+                mode3: `<strong>3. Lặp vô tận + Theo thứ tự + Dò bài</strong><br>
+                        • Cách ra thẻ: <strong>Tuần tự từ trên xuống</strong>. Sai đưa vào "Giỏ sai" để hỏi lại ở cuối vòng.<br>
+                        • Lặp vô tận: Đúng hết 100%, tự động nạp lại bài và hỏi lại theo đúng thứ tự ban đầu.<br>
+                        • Điều kiện kết thúc: Game <strong>chỉ kết thúc</strong> khi HP của Boss hoặc Hero giảm về 0.`,
+                mode4: `<strong>4. Theo thứ tự + Dò bài + End</strong><br>
+                        • Cách ra thẻ: <strong>Xuất hiện theo đúng thứ tự</strong>. Trả lời sai cất vào "Giỏ sai" để làm lại cuối vòng.<br>
+                        • Điều kiện kết thúc: Tự động kết thúc khi học sinh trả lời <strong>ĐÚNG 100%</strong> bộ bài.<br>
+                        • Phân định thắng thua: So sánh <strong>% HP còn lại</strong> của Hero và Boss. (Kết thúc sớm nếu HP=0).`
+            };
+
+            const modeSelectEl = document.getElementById('game-mode-select');
+            const modeDescEl = document.getElementById('game-mode-description');
+            modeSelectEl.addEventListener('change', (e) => {
+                modeDescEl.innerHTML = modeDescriptions[e.target.value] || modeDescriptions['mode1'];
+            });
+
+            function startGameTimer() {
+                clearInterval(gameTimerInterval);
+                let timeRemaining = suddenDeathTimerSec;
+                updateEnrageTimerUI(timeRemaining);
+                
+                gameTimerInterval = setInterval(() => {
+                    if (!isGameStarted || isGameOver || isGamePaused || isBossSleeping) return; 
+                    
+                    if (timeRemaining > 0 && !isEnraged) {
+                        timeRemaining--;
+                        updateEnrageTimerUI(timeRemaining);
+                        if (timeRemaining <= 0) {
+                            triggerEnrage();
+                        }
+                    }
+                }, 1000);
+            }
+
+            function updateEnrageTimerUI(sec) {
+                const timerDisplay = document.getElementById('enrage-timer-display');
+                if(!timerDisplay) return;
+                const m = Math.floor(sec / 60).toString().padStart(2, '0');
+                const s = (sec % 60).toString().padStart(2, '0');
+                timerDisplay.textContent = `ENRAGE IN: ${m}:${s}`;
+                timerDisplay.classList.remove('text-red-500', 'animate-pulse');
+                timerDisplay.classList.add('text-orange-400');
+            }
+
+            function triggerEnrage() {
+                isEnraged = true;
+                spawnFloatingText('boss-fx-container', '🔥 ENRAGE!', 'text-red-500 text-6xl drop-shadow-[0_0_20px_red]');
+                document.getElementById('boss-avatar-container').classList.add('shadow-[0_0_50px_red]', 'border-red-600');
+                
+                const timerDisplay = document.getElementById('enrage-timer-display');
+                if(timerDisplay) {
+                    timerDisplay.textContent = "🔥 ENRAGED 🔥";
+                    timerDisplay.classList.replace('text-orange-400', 'text-red-500');
+                    timerDisplay.classList.add('animate-pulse');
+                }
+                playLoseSound(); 
+            }
+
+            function applyDamageToBoss(dmg) {
+                if(isGameOver) return;
+                let actualDamageDealt = 0;
+
+                if (currentBossShield > 0) {
+                    playShieldSound();
+                    if (currentBossShield >= dmg) {
+                        currentBossShield -= dmg;
+                        actualDamageDealt = dmg;
+                        dmg = 0;
+                    } else {
+                        actualDamageDealt = currentBossShield;
+                        dmg -= currentBossShield;
+                        currentBossShield = 0;
+                        wakeUpBoss(false);
+                    }
+                    updateHpUI();
+                }
+                if (dmg > 0) {
+                    const dmgToHp = Math.min(currentBossHp, dmg);
+                    actualDamageDealt += dmgToHp;
+                    currentBossHp -= dmgToHp;
+                    updateHpUI();
+                    triggerDamage('boss');
+                }
+                
+                gameStats.dmg += actualDamageDealt; 
+                checkWinCondition();
+            }
+
+            function wakeUpBoss(isSuccess) {
+                if (!isBossSleeping) return;
+                isBossSleeping = false;
+                clearTimeout(bossSleepTimer);
+                clearInterval(bossZzzInterval);
+                
+                document.getElementById('boss-shield-bubble').style.opacity = '0';
+                document.getElementById('boss-shield-text').classList.replace('opacity-100', 'opacity-0');
+
+                if (isSuccess) {
+                    const healAmt = currentBossShield;
+                    if (healAmt > 0) {
+                        currentBossHp = Math.min(bossMaxHp, currentBossHp + healAmt);
+                        triggerHeal('boss', healAmt);
+                    }
+                } else {
+                    playErrorSound();
+                }
+                currentBossShield = 0;
+                updateHpUI();
+            }
+
+            let isAnimating = false;
+
+            async function executeFireballSkill(damage) {
+                isAnimating = true;
+
+                const projContainer = document.getElementById('projectile-layer');
+                const heroRect = document.getElementById('main-hero-avatar').parentElement.getBoundingClientRect();
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+
+                const fbSystem = document.createElement('div');
+                fbSystem.className = 'absolute z-[101] w-[200px] h-[200px] flex items-center justify-center';
+                
+                const startX = heroRect.left + heroRect.width / 2;
+                const startY = heroRect.top + heroRect.height / 2 - 40; 
+                fbSystem.style.left = `${startX}px`;
+                fbSystem.style.top = `${startY}px`;
+                fbSystem.style.transform = 'translate(-50%, -50%) scale(0.1)';
+                
+                const core = document.createElement('div');
+                core.className = 'absolute w-12 h-12 bg-white rounded-full shadow-[0_0_40px_rgba(255,255,255,1)] flex items-center justify-center transition-all duration-1000 z-10';
+                
+                const aura = document.createElement('div');
+                aura.className = 'absolute w-full h-full border-[8px] border-yellow-300 rounded-full border-dashed animate-[spin_3s_linear_reverse_infinite] opacity-0 transition-opacity duration-1000 z-0';
+                core.appendChild(aura);
+                fbSystem.appendChild(core);
+
+                const numFlames = 5;
+                const radius = 50; 
+                const flames = [];
+
+                for (let i = 0; i < numFlames; i++) {
+                    const angle = (i * (360 / numFlames)) * (Math.PI / 180);
+                    const flame = document.createElement('div');
+                    flame.innerHTML = '🔥';
+                    flame.className = 'absolute text-5xl transition-all duration-1000 z-20';
+                    flame.style.left = '100px'; 
+                    flame.style.top = '100px';
+                    flame.style.transform = 'translate(-50%, -50%)';
+                    flame.dataset.angle = angle;
+                    fbSystem.appendChild(flame);
+                    flames.push(flame);
+                }
+
+                projContainer.appendChild(fbSystem);
+                playChargeSound();
+
+                requestAnimationFrame(() => {
+                    fbSystem.style.transition = 'transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    fbSystem.style.transform = 'translate(-50%, -50%) scale(1)';
+                    flames.forEach(f => {
+                        const a = parseFloat(f.dataset.angle);
+                        const x = 100 + radius * Math.cos(a);
+                        const y = 100 + radius * Math.sin(a);
+                        f.style.left = `${x}px`;
+                        f.style.top = `${y}px`;
+                    });
+                });
+
+                let spinAngle = 0;
+                const spinInterval = setInterval(() => {
+                    spinAngle += 0.1;
+                    flames.forEach(f => {
+                        const a = parseFloat(f.dataset.angle) + spinAngle;
+                        const x = 100 + radius * Math.cos(a);
+                        const y = 100 + radius * Math.sin(a);
+                        f.style.left = `${x}px`;
+                        f.style.top = `${y}px`;
+                        f.style.transform = `translate(-50%, -50%) rotate(${a * 180 / Math.PI + 90}deg)`;
+                    });
+                }, 16);
+
+                await new Promise(r => setTimeout(r, 1500));
+
+                clearInterval(spinInterval);
+                core.style.width = '180px';
+                core.style.height = '180px';
+                core.style.backgroundColor = '#fbbf24'; 
+                core.style.boxShadow = '0 0 80px rgba(251, 191, 36, 1), inset 0 0 30px white';
+                aura.style.opacity = '1';
+
+                flames.forEach(f => {
+                    f.style.left = '100px';
+                    f.style.top = '100px';
+                    f.style.opacity = '0';
+                    f.style.transform = 'translate(-50%, -50%) scale(2)';
+                });
+
+                await new Promise(r => setTimeout(r, 800));
+
+                const targetX = bossRect.left + bossRect.width / 2;
+                const targetY = bossRect.top + bossRect.height / 2;
+
+                fbSystem.style.transition = 'all 0.4s cubic-bezier(0.5, 0, 1, 0.5)';
+                fbSystem.style.left = `${targetX}px`;
+                fbSystem.style.top = `${targetY}px`;
+                fbSystem.style.transform = 'translate(-50%, -50%) scale(1.5)';
+
+                playShootSound();
+                await new Promise(r => setTimeout(r, 400));
+
+                fbSystem.remove();
+                
+                const explosion = document.createElement('div');
+                explosion.innerHTML = '💥';
+                explosion.className = 'absolute text-[120px] z-[102] transition-all duration-300 drop-shadow-[0_0_50px_yellow]';
+                explosion.style.left = `${targetX}px`;
+                explosion.style.top = `${targetY}px`;
+                explosion.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                projContainer.appendChild(explosion);
+                
+                requestAnimationFrame(() => {
+                    explosion.style.transform = 'translate(-50%, -50%) scale(2.5)';
+                    explosion.style.opacity = '0';
+                });
+                setTimeout(() => explosion.remove(), 300);
+
+                applyDamageToBoss(damage);
+
+                const bossAvatar = document.getElementById('boss-avatar-container');
+                const bossRage = document.getElementById('boss-rage-bar');
+                bossAvatar.classList.add('burn-effect');
+                if(bossRage) {
+                    bossRage.classList.replace('bg-yellow-400', 'bg-red-800'); 
+                    bossRage.classList.replace('bg-orange-500', 'bg-red-800'); 
+                    bossRage.classList.replace('bg-red-600', 'bg-red-800'); 
+                }
+
+                await new Promise(r => setTimeout(r, 1500));
+                
+                bossAvatar.classList.remove('burn-effect');
+                if(bossRage) bossRage.classList.remove('bg-red-800');
+
+                isAnimating = false;
+                if (!isGameOver && isGameStarted && activeCards.every(c => c === null) && availableCards.length > 0) fillBoard();
+            }
+
+            async function executeFreezeSkill(durationStr) {
+                isAnimating = true;
+                const duration = (parseInt(durationStr) || 5) * 1000;
+                const projLayer = document.getElementById('projectile-layer');
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+                
+                const snowman = document.createElement('div');
+                snowman.innerHTML = '⛄';
+                snowman.className = 'absolute text-[120px] z-[102] transition-all duration-500 ease-in drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]';
+                const targetX = bossRect.left + bossRect.width / 2;
+                const targetY = bossRect.top + bossRect.height / 2;
+                
+                snowman.style.left = `${targetX}px`;
+                snowman.style.top = `-100px`;
+                snowman.style.transform = 'translate(-50%, -50%)';
+                projLayer.appendChild(snowman);
+                
+                playShootSound();
+
+                requestAnimationFrame(() => {
+                    snowman.style.top = `${targetY}px`;
+                });
+
+                await new Promise(r => setTimeout(r, 500));
+                
+                snowman.remove();
+                playFreezeSound();
+                isBossFrozen = true;
+                const bossContainer = document.getElementById('boss-avatar-container');
+                bossContainer.classList.add('frozen-boss');
+
+                isAnimating = false;
+                if (!isGameOver && isGameStarted && activeCards.every(c => c === null) && availableCards.length > 0) fillBoard();
+
+                setTimeout(() => {
+                    isBossFrozen = false;
+                    bossContainer.classList.remove('frozen-boss');
+                    if(!isGameOver && isGameStarted) playErrorSound(); 
+                }, duration);
+            }
+
+            function executeFriendPowerSkill(dmgPerHit) {
+                isAnimating = true;
+                const numHits = 15;
+                const projLayer = document.getElementById('projectile-layer');
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+                const endX = bossRect.left + bossRect.width / 2;
+                const endY = bossRect.top + bossRect.height / 2;
+
+                for(let i=0; i<numHits; i++) {
+                    setTimeout(() => {
+                        playMeteorSound();
+                        
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'absolute z-[100] transition-all linear flex items-center justify-center';
+                        wrapper.style.transitionDuration = '800ms';
+                        wrapper.innerHTML = '<span class="text-5xl drop-shadow-[0_0_10px_orange]">☄️</span>';
+
+                        const startX = endX + (Math.random() - 0.5) * 600 + 300; 
+                        const startY = -100;
+                        const targetX = endX + (Math.random() - 0.5) * 100;
+                        const targetY = endY + (Math.random() - 0.5) * 100;
+
+                        wrapper.style.left = `${startX}px`;
+                        wrapper.style.top = `${startY}px`;
+                        wrapper.style.transform = 'translate(-50%, -50%)';
+                        projLayer.appendChild(wrapper);
+
+                        void wrapper.offsetWidth; 
+
+                        wrapper.style.left = `${targetX}px`;
+                        wrapper.style.top = `${targetY}px`;
+
+                        setTimeout(() => {
+                            wrapper.remove(); 
+                            
+                            const hitFx = document.createElement('div');
+                            hitFx.innerHTML = '💥';
+                            hitFx.className = 'absolute text-4xl z-[102] transition-all duration-200 drop-shadow-[0_0_10px_yellow]';
+                            hitFx.style.left = `${targetX}px`;
+                            hitFx.style.top = `${targetY}px`;
+                            hitFx.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                            projLayer.appendChild(hitFx);
+                            
+                            requestAnimationFrame(() => {
+                                hitFx.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                                hitFx.style.opacity = '0';
+                            });
+                            setTimeout(() => hitFx.remove(), 200);
+
+                            applyDamageToBoss(dmgPerHit);
+                        }, 800);
+
+                    }, i * 150);
+                }
+
+                setTimeout(() => {
+                    isAnimating = false;
+                    if (!isGameOver && isGameStarted && activeCards.every(c => c === null) && availableCards.length > 0) fillBoard();
+                }, (numHits * 150) + 800);
+            }
+
+            function executeBowAttack(baseDamage) {
+                isAnimating = true;
+                const projLayer = document.getElementById('projectile-layer');
+                const bowElement = document.getElementById('btn-bow');
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+                const bowRect = bowElement.getBoundingClientRect();
+
+                const startX = bowRect.left + bowRect.width / 2;
+                const startY = bowRect.top + bowRect.height / 2;
+                const endX = bossRect.left + bossRect.width / 2;
+                const endY = bossRect.top + bossRect.height / 2;
+
+                let numArrows = 8;
+                let damage = baseDamage;
+
+                if (isDoubleStrikeActive) {
+                    const multiplier = parseInt(document.querySelector('input[data-save="h_s5_v1"]')?.value) || 2;
+                    damage = baseDamage * multiplier;
+                    numArrows = 16; 
+                    isDoubleStrikeActive = false;
+                    bowElement.classList.remove('bow-buffed');
+                }
+                
+                for(let i = 0; i < numArrows; i++) {
+                    setTimeout(() => {
+                        playShootSound();
+
+                        const arrow = document.createElement('div');
+                        arrow.innerHTML = (i % 2 === 0 && numArrows > 8) ? '⚡' : '🏹'; 
+                        arrow.className = `absolute text-4xl z-[100] transition-all drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] ${numArrows > 8 && i % 2 === 0 ? 'scale-150 filter brightness-150' : ''}`;
+                        
+                        const spreadX = (Math.random() - 0.5) * 80;
+                        const spreadY = (Math.random() - 0.5) * 80;
+                        const targetX = endX + spreadX;
+                        const targetY = endY + spreadY;
+                        
+                        arrow.style.left = `${startX}px`;
+                        arrow.style.top = `${startY}px`;
+                        
+                        const angle = Math.atan2(targetY - startY, targetX - startX) * 180 / Math.PI;
+                        arrow.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                        
+                        projLayer.appendChild(arrow);
+
+                        requestAnimationFrame(() => {
+                            arrow.style.transitionDuration = '400ms';
+                            arrow.style.transitionTimingFunction = 'ease-in';
+                            arrow.style.left = `${targetX}px`;
+                            arrow.style.top = `${targetY}px`;
+                        });
+
+                        setTimeout(() => {
+                            arrow.remove();
+                            const hitFx = document.createElement('div');
+                            hitFx.innerHTML = '💥';
+                            hitFx.className = 'absolute text-3xl z-[102] transition-all duration-200 drop-shadow-[0_0_10px_yellow]';
+                            hitFx.style.left = `${targetX}px`;
+                            hitFx.style.top = `${targetY}px`;
+                            hitFx.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                            projLayer.appendChild(hitFx);
+                            
+                            requestAnimationFrame(() => {
+                                hitFx.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                                hitFx.style.opacity = '0';
+                            });
+                            setTimeout(() => hitFx.remove(), 200);
+
+                        }, 400);
+                    }, i * 60); 
+                }
+                
+                setTimeout(() => {
+                    applyDamageToBoss(damage);
+                    isAnimating = false;
+                }, 400 + (numArrows * 60));
+            }
+
+            function executeBossFoodAttack(dmgPerHit) {
+                const totalHits = 5;
+                const projLayer = document.getElementById('projectile-layer');
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+                const heroRect = document.getElementById('hero-avatar-wrapper').getBoundingClientRect();
+                
+                const startX = bossRect.left + bossRect.width / 2;
+                const startY = bossRect.top + bossRect.height / 2;
+                const endX = heroRect.left + heroRect.width / 2;
+                const endY = heroRect.top + heroRect.height / 2;
+                
+                const foodEmojis = ['🍔', '🍕', '🍟', '🍩', '🍦', '🍬', '🍗', '🌭'];
+
+                for(let i=0; i<totalHits; i++) {
+                    setTimeout(() => {
+                        playShootSound(); 
+                        const item = document.createElement('div');
+                        item.innerHTML = foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
+                        item.className = 'absolute text-5xl z-[100] animate-[spin_1s_linear_infinite] drop-shadow-xl';
+                        
+                        const targetX = endX + (Math.random() - 0.5) * 80;
+                        const targetY = endY + (Math.random() - 0.5) * 80;
+
+                        item.style.left = `${startX}px`;
+                        item.style.top = `${startY}px`;
+                        item.style.transform = 'translate(-50%, -50%)';
+                        item.style.transition = 'all 800ms ease-in'; 
+                        projLayer.appendChild(item);
+
+                        void item.offsetWidth;
+
+                        item.style.left = `${targetX}px`;
+                        item.style.top = `${targetY}px`;
+
+                        setTimeout(() => {
+                            item.remove();
+                            const hitFx = document.createElement('div');
+                            hitFx.innerHTML = '💥';
+                            hitFx.className = 'absolute text-4xl z-[102] transition-all duration-200 drop-shadow-[0_0_10px_red]';
+                            hitFx.style.left = `${targetX}px`;
+                            hitFx.style.top = `${targetY}px`;
+                            hitFx.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                            projLayer.appendChild(hitFx);
+
+                            requestAnimationFrame(() => {
+                                hitFx.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                                hitFx.style.opacity = '0';
+                            });
+                            setTimeout(() => hitFx.remove(), 200);
+
+                            if(isGameOver) return;
+                            let dmg = dmgPerHit;
+                            if (currentHeroShield > 0) {
+                                playShieldSound();
+                                if (currentHeroShield >= dmg) { currentHeroShield -= dmg; dmg = 0; }
+                                else { dmg -= currentHeroShield; currentHeroShield = 0; }
+                            }
+                            if (dmg > 0) {
+                                currentHeroHp = Math.max(0, currentHeroHp - dmg);
+                                playHitSound();
+                            }
+                            updateHpUI();
+                            if(i === totalHits - 1) triggerDamage('hero'); 
+                            checkWinCondition();
+                        }, 800);
+                    }, i * 150);
+                }
+            }
+
+            async function executeBossThunderSkill(durationStr) {
+                const duration = (parseInt(durationStr) || 4) * 1000;
+                const flashOverlay = document.getElementById('flash-overlay');
+                const projLayer = document.getElementById('projectile-layer');
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+                const heroRect = document.getElementById('hero-avatar-wrapper').getBoundingClientRect();
+                
+                const startX = bossRect.left + bossRect.width / 2;
+                const startY = bossRect.top + bossRect.height / 2;
+                const endX = heroRect.left + heroRect.width / 2;
+                const endY = heroRect.top + heroRect.height / 2;
+
+                const turtle = document.createElement('div');
+                turtle.innerHTML = '🐢';
+                turtle.className = 'absolute text-6xl z-[100] drop-shadow-lg';
+                turtle.style.left = `${startX}px`;
+                turtle.style.top = `${startY}px`;
+                turtle.style.transform = 'translate(-50%, -50%) scaleX(-1)'; 
+                turtle.style.transition = 'all 1200ms linear';
+                
+                projLayer.appendChild(turtle);
+                void turtle.offsetWidth;
+                
+                turtle.style.left = `${endX}px`;
+                turtle.style.top = `${endY}px`;
+                
+                await new Promise(r => setTimeout(r, 1200));
+                turtle.remove();
+
+                if(isGameOver) return;
+                playThunderSound();
+                
+                flashOverlay.classList.remove('hidden');
+                flashOverlay.classList.add('flash-screen-fx');
+                setTimeout(() => {
+                    flashOverlay.classList.remove('flash-screen-fx');
+                }, 500);
+
+                const bolt = document.createElement('div');
+                bolt.className = 'absolute bg-white z-[101] shadow-[0_0_30px_yellow,0_0_60px_white]';
+                
+                const length = Math.hypot(endX - startX, endY - startY);
+                const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+
+                bolt.style.width = `${length}px`;
+                bolt.style.height = '20px';
+                bolt.style.left = `${startX}px`;
+                bolt.style.top = `${startY}px`;
+                bolt.style.transformOrigin = '0 50%';
+                bolt.style.transform = `translateY(-50%) rotate(${angle}deg)`;
+                bolt.style.clipPath = 'polygon(0 40%, 20% 0, 40% 60%, 60% 10%, 80% 80%, 100% 30%, 100% 70%, 80% 100%, 60% 40%, 40% 90%, 20% 40%, 0 60%)';
+                
+                projLayer.appendChild(bolt);
+                setTimeout(() => bolt.remove(), 200);
+
+                triggerDamage('hero');
+                isHeroParalyzed = true;
+                document.getElementById('thunder-hero-lock').classList.remove('hidden');
+                document.getElementById('thunder-card-lock').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    isHeroParalyzed = false;
+                    document.getElementById('thunder-hero-lock').classList.add('hidden');
+                    document.getElementById('thunder-card-lock').classList.add('hidden');
+                }, duration);
+            }
+
+            async function executeBossConfusionSkill(durationStr) {
+                const duration = (parseInt(durationStr) || 5) * 1000;
+                const projLayer = document.getElementById('projectile-layer');
+                const bossRect = document.getElementById('boss-avatar-container').getBoundingClientRect();
+                const cardArea = document.querySelector('.w-1\\/3');
+                const cardRect = cardArea.getBoundingClientRect();
+                
+                const startX = bossRect.left + bossRect.width / 2;
+                const startY = bossRect.top + bossRect.height / 2;
+                const endX = cardRect.left + cardRect.width / 2;
+                const endY = cardRect.top + cardRect.height / 2;
+
+                playShootSound(); 
+
+                const spiral = document.createElement('div');
+                spiral.innerHTML = '🌀';
+                spiral.className = 'absolute text-6xl z-[101] drop-shadow-[0_0_20px_purple]';
+                spiral.style.left = `${startX}px`;
+                spiral.style.top = `${startY}px`;
+                spiral.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                spiral.style.transition = 'all 800ms ease-in-out';
+                
+                projLayer.appendChild(spiral);
+                void spiral.offsetWidth;
+
+                spiral.style.left = `${endX}px`;
+                spiral.style.top = `${endY}px`;
+                spiral.style.transform = 'translate(-50%, -50%) scale(5) rotate(720deg)';
+
+                await new Promise(r => setTimeout(r, 800));
+                spiral.remove();
+                
+                if(isGameOver) return;
+                playConfusionSound(); 
+                for(let i=1; i<=3; i++) {
+                    const card = document.querySelector(`#card-wrapper-${i} .card-clickable`);
+                    if(card) {
+                        card.classList.add(`confused-card-${i}`);
+                        setTimeout(() => {
+                            card.classList.remove(`confused-card-${i}`);
+                        }, duration);
+                    }
+                }
+            }
+
+            function executeBossRestSkill(shieldAmt, durationSec) {
+                isBossSleeping = true;
+                currentBossShield = shieldAmt;
+                updateHpUI();
+
+                const shieldBubble = document.getElementById('boss-shield-bubble');
+                const shieldText = document.getElementById('boss-shield-text');
+                if(shieldBubble) shieldBubble.style.opacity = '1';
+                if(shieldText) {
+                    shieldText.classList.replace('opacity-0', 'opacity-100');
+                    shieldText.classList.replace('scale-50', 'scale-100');
+                }
+
+                bossZzzInterval = setInterval(() => {
+                    if(isBossSleeping && !isGameOver) spawnFloatingText('boss-fx-container', '💤', 'text-blue-300 text-4xl');
+                }, 800);
+
+                bossSleepTimer = setTimeout(() => {
+                    if(isBossSleeping && !isGameOver) {
+                        wakeUpBoss(true); 
+                    }
+                }, durationSec * 1000);
+            }
+
+            const tbody = document.getElementById('grid-body');
+            let currentRowCount = 0;
+
+            function attachListenersToInput(input) {
+                input.addEventListener('focus', function() { this.parentElement.classList.add('focused'); if(this.parentElement.parentElement.classList.contains('excel-cell')) this.parentElement.parentElement.classList.add('focused'); });
+                input.addEventListener('blur', function() { this.parentElement.classList.remove('focused'); if(this.parentElement.parentElement.classList.contains('excel-cell')) this.parentElement.parentElement.classList.remove('focused'); });
+                if (input.dataset.col === 'id') {
+                    input.addEventListener('input', function() {
+                        const rowId = this.dataset.row; const previewImg = document.getElementById(`preview-${rowId}`); const val = this.value.trim();
+                        if (val !== '') {
+                            previewImg.src = `images/${val}.png`;
+                            previewImg.onerror = function() {
+                                if (this.src.includes('.png')) this.src = `images/${val}.jpg`;
+                                else { this.onerror = null; this.src = `https://placehold.co/32x32/f1f5f9/94a3b8?text=N/A`; }
+                            };
+                            previewImg.classList.remove('hidden');
+                        } else { previewImg.classList.add('hidden'); previewImg.src = ''; }
+                    });
+                }
+                input.addEventListener('keydown', function(e) {
+                    const row = parseInt(this.dataset.row); const col = this.dataset.col; let nextRow = row; let nextInput = null;
+                    if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); nextRow = row < currentRowCount ? row + 1 : row; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
+                    else if (e.key === 'ArrowUp') { e.preventDefault(); nextRow = row > 1 ? row - 1 : 1; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
+                    else if (e.key === 'ArrowRight' && this.selectionStart === this.value.length) { if(col === 'id') nextInput = document.querySelector(`.excel-input[data-row="${row}"][data-col="text"]`); if(nextInput) e.preventDefault(); }
+                    else if (e.key === 'ArrowLeft' && this.selectionStart === 0) { if(col === 'text') nextInput = document.querySelector(`.excel-input[data-row="${row}"][data-col="id"]`); if(nextInput) e.preventDefault(); }
+                    if (nextInput) nextInput.focus();
+                });
+            }
+
+            function createGridRow(i) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="row-num">${i}</td>
+                    <td class="excel-cell">
+                        <div class="flex items-center w-full h-full">
+                            <input type="text" class="excel-input text-left font-bold text-edNavy" data-col="id" data-row="${i}">
+                            <img src="" class="img-preview hidden" id="preview-${i}">
+                        </div>
+                    </td>
+                    <td class="excel-cell"><input type="text" class="excel-input text-left" data-col="text" data-row="${i}"></td>
+                    <td class="excel-cell flex items-center justify-center"><input type="checkbox" class="custom-checkbox" data-col="priority" data-row="${i}"></td>
+                `;
+                tbody.appendChild(tr);
+                tr.querySelectorAll('.excel-input').forEach(attachListenersToInput);
+                currentRowCount = i;
+            }
+
+            for (let i = 1; i <= 5; i++) { createGridRow(i); }
+
+            const modal = document.getElementById('settings-modal');
+            const modalContent = document.getElementById('modal-content');
+            const openBtn = document.getElementById('open-settings-btn');
+            const closeBtn = document.getElementById('close-settings-btn');
+            const stopGameBtn = document.getElementById('stop-game-btn');
+            const pauseBtn = document.getElementById('pause-game-btn');
+            const pauseIcon = document.getElementById('pause-icon');
+            const playIcon = document.getElementById('play-icon');
+            const pauseOverlay = document.getElementById('pause-overlay');
+            const startOverlay = document.getElementById('start-screen-overlay');
+            const startBattleBtn = document.getElementById('btn-start-battle');
+
+            openBtn.addEventListener('click', () => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            });
+            
+            const closeModal = () => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-100');
+                modalContent.classList.add('scale-95');
+            };
+            
+            closeBtn.addEventListener('click', closeModal);
+
+            stopGameBtn.addEventListener('click', () => {
+                showCustomAlert("Bạn muốn dừng game và mở bảng Cài đặt?", "confirm", () => {
+                    isGamePaused = false;
+                    pauseIcon.classList.remove('hidden');
+                    playIcon.classList.add('hidden');
+                    pauseOverlay.classList.add('hidden');
+                    pauseBtn.classList.replace('bg-green-500', 'bg-yellow-500');
+                    pauseBtn.classList.replace('hover:bg-green-600', 'hover:bg-yellow-600');
+
+                    modal.classList.remove('opacity-0', 'pointer-events-none');
+                    modalContent.classList.remove('scale-95');
+                    modalContent.classList.add('scale-100');
+                });
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                if(isGameOver || !isGameStarted) return;
+                isGamePaused = !isGamePaused;
+                if (isGamePaused) {
+                    pauseIcon.classList.add('hidden');
+                    playIcon.classList.remove('hidden');
+                    pauseOverlay.classList.remove('hidden');
+                    pauseBtn.classList.replace('bg-yellow-500', 'bg-green-500');
+                    pauseBtn.classList.replace('hover:bg-yellow-600', 'hover:bg-green-600');
+                } else {
+                    pauseIcon.classList.remove('hidden');
+                    playIcon.classList.add('hidden');
+                    pauseOverlay.classList.add('hidden');
+                    pauseBtn.classList.replace('bg-green-500', 'bg-yellow-500');
+                    pauseBtn.classList.replace('hover:bg-green-600', 'hover:bg-yellow-600');
+                }
+            });
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => { b.classList.remove('active', 'bg-edNavy', 'text-white'); b.classList.add('bg-e5e7eb', 'text-374151'); });
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    btn.classList.remove('bg-e5e7eb', 'text-374151'); btn.classList.add('active', 'bg-edNavy', 'text-white');
+                    document.getElementById(btn.dataset.target).classList.add('active');
+                });
+            });
+
+            document.getElementById('btn-auto-id').addEventListener('click', () => {
+                const from = parseInt(document.getElementById('auto-id-from').value); const to = parseInt(document.getElementById('auto-id-to').value);
+                if(isNaN(from) || isNaN(to) || from > to) { showCustomAlert("Khoảng số không hợp lệ!"); return; }
+                while (currentRowCount < to) { createGridRow(currentRowCount + 1); }
+                let cRow = 1;
+                for(let i = from; i <= to; i++) {
+                    const idInput = document.querySelector(`.excel-input[data-col="id"][data-row="${cRow}"]`);
+                    if(idInput) { idInput.value = i; idInput.dispatchEvent(new Event('input')); }
+                    cRow++;
+                }
+            });
+
+            document.getElementById('btn-clear-data').addEventListener('click', () => {
+                showCustomAlert("Xóa toàn bộ dữ liệu trong bảng?", "confirm", () => {
+                    document.querySelectorAll('.excel-input').forEach(input => { input.value = ''; if(input.dataset.col === 'id') input.dispatchEvent(new Event('input')); });
+                    document.querySelectorAll('.custom-checkbox').forEach(cb => cb.checked = false);
+                });
+            });
+
+            document.getElementById('data-grid').addEventListener('paste', function(e) {
+                e.preventDefault(); const pastedData = (e.clipboardData || window.clipboardData).getData('Text'); if (!pastedData) return;
+                const activeElement = document.activeElement; if (!activeElement.classList.contains('excel-input')) return;
+                const startRow = parseInt(activeElement.dataset.row); const columns = ['id', 'text']; let startColIndex = columns.indexOf(activeElement.dataset.col);
+                const rows = pastedData.split(/\r?\n/); 
+                const neededRows = startRow + rows.length - 1;
+                while(currentRowCount < neededRows) { createGridRow(currentRowCount + 1); }
+                let cRow = startRow;
+                rows.forEach(row => {
+                    if (row.trim() === '') return;
+                    const cells = row.split('\t'); let currentColIndex = startColIndex;
+                    cells.forEach(cellText => {
+                        if (currentColIndex < columns.length) {
+                            const targetInput = document.querySelector(`.excel-input[data-col="${columns[currentColIndex]}"][data-row="${cRow}"]`);
+                            if (targetInput) { targetInput.value = cellText; if(columns[currentColIndex] === 'id') targetInput.dispatchEvent(new Event('input')); }
+                        }
+                        currentColIndex++;
+                    });
+                    cRow++;
+                });
+            });
+
+            function updateWeaponStatsUI() {
+                const bowText = document.getElementById('ui-bow-text');
+                const shieldText = document.getElementById('ui-shield-text');
+                const healText = document.getElementById('ui-heal-text');
+
+                const atkRate = parseInt(document.getElementById('hero-mana-atk').value) || 10;
+                const defRate = parseInt(document.getElementById('hero-mana-def').value) || 5;
+                const healRate = parseInt(document.getElementById('hero-mana-heal').value) || 15;
+
+                if (bowText) bowText.innerText = `-${currentMana * atkRate} DMG`;
+                if (shieldText) shieldText.innerText = `+${currentMana * defRate} DEF`;
+                
+                if (healText) {
+                    const hpNeeded = heroMaxHp - currentHeroHp;
+                    let manaUsed = currentMana;
+                    if (hpNeeded > 0) {
+                        const manaNeeded = Math.ceil(hpNeeded / healRate);
+                        if (currentMana > manaNeeded) manaUsed = manaNeeded;
+                    } else {
+                        manaUsed = 0;
+                    }
+                    const healAmount = manaUsed * healRate;
+                    healText.innerText = `+${healAmount} HP`;
+                    
+                    if (healAmount > 0) {
+                        healText.classList.remove('opacity-0');
+                        healText.classList.add('opacity-100');
+                    } else {
+                        healText.classList.add('opacity-0');
+                        healText.classList.remove('opacity-100');
+                    }
+                }
+            }
+
+            function updateHpUI() {
+                const heroHpBar = document.getElementById('hero-hp-bar');
+                const heroHpText = document.getElementById('hero-hp-text');
+                const bossHpBar = document.getElementById('boss-hp-bar');
+                const bossHpText = document.getElementById('boss-hp-text');
+                const heroShieldBubble = document.getElementById('hero-shield-bubble');
+                const heroShieldText = document.getElementById('hero-shield-text');
+                const bossShieldText = document.getElementById('boss-shield-text');
+
+                if(heroHpBar && heroHpText) {
+                    const heroPercent = Math.max(0, (currentHeroHp / heroMaxHp) * 100);
+                    heroHpBar.style.width = `${heroPercent}%`;
+                    heroHpText.textContent = `${currentHeroHp} / ${heroMaxHp}`;
+                }
+                
+                if(heroShieldBubble && heroShieldText) {
+                    if(currentHeroShield > 0) {
+                        heroShieldBubble.style.opacity = '1';
+                        heroShieldText.textContent = currentHeroShield;
+                        heroShieldText.classList.remove('opacity-0', 'scale-50');
+                        heroShieldText.classList.add('opacity-100', 'scale-100');
+                    } else {
+                        heroShieldBubble.style.opacity = '0';
+                        heroShieldText.classList.remove('opacity-100', 'scale-100');
+                        heroShieldText.classList.add('opacity-0', 'scale-50');
+                    }
+                }
+
+                if(bossHpBar && bossHpText) {
+                    const bossPercent = Math.max(0, (currentBossHp / bossMaxHp) * 100);
+                    bossHpBar.style.width = `${bossPercent}%`;
+                    bossHpText.textContent = `${currentBossHp} / ${bossMaxHp}`;
+                }
+
+                if(bossShieldText && currentBossShield > 0) {
+                    bossShieldText.textContent = currentBossShield;
+                }
+                
+                updateWeaponStatsUI();
+            }
+
+            function spawnEndgameParticles() {
+                const layer = document.getElementById('projectile-layer');
+                const emojis = ['🎉', '✨', '🎊', '🎈'];
+                for(let i=0; i<30; i++) {
+                    setTimeout(() => {
+                        const el = document.createElement('div');
+                        el.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                        el.className = 'particle-fall text-4xl sm:text-5xl drop-shadow-lg';
+                        el.style.left = `${Math.random() * 100}vw`;
+                        el.style.animationDuration = `${3 + Math.random() * 3}s`;
+                        layer.appendChild(el);
+                        setTimeout(() => el.remove(), 6000);
+                    }, Math.random() * 2000);
+                }
+            }
+
+            function spawnLoserTears(targetId) {
+                const layer = document.getElementById('projectile-layer');
+                const targetWrapper = document.getElementById(targetId);
+                if(!targetWrapper) return;
+                
+                const targetRect = targetWrapper.getBoundingClientRect();
+                const loserTearInterval = setInterval(() => {
+                    if(!isGameOver) { clearInterval(loserTearInterval); return; }
+                    const el = document.createElement('div');
+                    el.innerHTML = '💧';
+                    el.className = 'tear-drop-anim text-3xl drop-shadow-md';
+                    el.style.left = `${targetRect.left + (targetRect.width/2) + (Math.random()*60 - 30)}px`;
+                    el.style.top = `${targetRect.top + targetRect.height/2}px`;
+                    layer.appendChild(el);
+                    setTimeout(() => el.remove(), 1000);
+                }, 400);
+            }
+
+            function showWinnerProps() {
+                const propsWrapper = document.getElementById('hero-win-props');
+                if(propsWrapper) {
+                    propsWrapper.classList.remove('opacity-0');
+                    propsWrapper.classList.add('pop-up-epic');
+                }
+                
+                const heroAnimBox = document.getElementById('hero-anim-box');
+                if (heroAnimBox) heroAnimBox.style.zIndex = '999';
+                const heroCore = document.getElementById('hero-core-wrapper');
+                if (heroCore) heroCore.style.zIndex = '999';
+            }
+
+            function spawnBossWinOrbit(targetId) {
+                const container = document.getElementById(targetId);
+                if(!container) return;
+
+                const orbitSystem = document.createElement('div');
+                orbitSystem.className = 'orbit-system pop-in-element';
+
+                const foods = ['🍔', '🍕', '🍟', '🍩', '🌭', '🍗', '🍬', '🍦'];
+                const radius = 160;
+
+                foods.forEach((emoji, index) => {
+                    const angle = (index / 8) * 360 * (Math.PI / 180);
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+
+                    const item = document.createElement('div');
+                    item.className = 'orbit-item text-[60px] drop-shadow-xl';
+                    item.innerHTML = emoji;
+                    item.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`; 
+                    
+                    const posWrapper = document.createElement('div');
+                    posWrapper.style.position = 'absolute';
+                    posWrapper.style.left = `${x}px`;
+                    posWrapper.style.top = `${y}px`;
+                    
+                    const innerEmoji = document.createElement('div');
+                    innerEmoji.className = 'orbit-item text-[60px] drop-shadow-xl';
+                    innerEmoji.innerHTML = emoji;
+                    
+                    posWrapper.appendChild(innerEmoji);
+                    orbitSystem.appendChild(posWrapper);
+                });
+
+                container.appendChild(orbitSystem);
+            }
+
+            function showLeaderboardOverlay(winner) {
+                const overlay = document.getElementById('leaderboard-overlay');
+                const box = document.getElementById('leaderboard-box');
+                const title = document.getElementById('lb-title');
+                const subtitle = document.getElementById('lb-subtitle');
+                const avatar = document.getElementById('lb-avatar');
+                const heroId = document.getElementById('hero-avatar-id').value.trim();
+                
+                document.getElementById('lb-input-state').classList.remove('hidden');
+                document.getElementById('lb-board-state').classList.add('hidden');
+                
+                const nameInput = document.getElementById('lb-hero-name');
+                nameInput.value = '';
+                nameInput.disabled = false;
+                document.getElementById('btn-save-score').classList.remove('hidden');
+
+                document.getElementById('lb-correct').textContent = gameStats.correct;
+                document.getElementById('lb-wrong').textContent = gameStats.wrong;
+                document.getElementById('lb-time').textContent = gameStats.dmg; 
+
+                // --- BẮT ĐẦU CẬP NHẬT LOGIC TÍNH ĐIỂM (PERFECT MASTERY) ---
+                let baseScore = 0;
+                
+                // 1. Thắng được cộng 5000
+                if (winner === 'hero') {
+                    baseScore += 5000; 
+                }
+                
+                // 2. Điểm chính xác (Tối đa 4000)
+                const totalAttempts = gameStats.correct + gameStats.wrong;
+                let accuracyBonus = 0;
+                if (totalAttempts > 0) {
+                    accuracyBonus = (gameStats.correct / totalAttempts) * 4000;
+                }
+                
+                // 3. Điểm sinh tồn (Tối đa 1000)
+                const hpBonus = (currentHeroHp / heroMaxHp) * 1000;
+                
+                // 4. Điểm phạt (Sai trừ 100/lần)
+                const penalty = gameStats.wrong * 100;
+                
+                // 5. Tổng kết và làm tròn (Không bé hơn 0)
+                let finalScore = Math.round(baseScore + accuracyBonus + hpBonus - penalty);
+                finalScore = Math.max(0, finalScore);
+                
+                gameStats.finalScore = finalScore; 
+                // --- KẾT THÚC CẬP NHẬT LOGIC TÍNH ĐIỂM ---
+                
+                let currentDisp = 0;
+                const scoreEl = document.getElementById('lb-score');
+                scoreEl.textContent = '0';
+                const increment = Math.ceil(finalScore / 40) || 1;
+                const countInterval = setInterval(() => {
+                    currentDisp += increment;
+                    if(currentDisp >= finalScore) {
+                        currentDisp = finalScore;
+                        clearInterval(countInterval);
+                        scoreEl.classList.add('scale-110', 'text-yellow-200');
+                        setTimeout(() => scoreEl.classList.remove('scale-110', 'text-yellow-200'), 300);
+                    }
+                    scoreEl.textContent = currentDisp;
+                }, 30);
+
+                if (heroId) {
+                    avatar.src = `Hero/${heroId}.png`;
+                    avatar.onerror = function() {
+                        if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
+                        else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
+                    };
+                }
+
+                if (winner === 'hero') {
+                    title.textContent = "VICTORY";
+                    title.className = "text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-yellow-500 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] mb-2 uppercase tracking-widest";
+                    subtitle.textContent = "Glorious triumph!";
+                    subtitle.className = "text-yellow-200 text-lg font-bold mb-6";
+                } else {
+                    title.textContent = "DEFEAT";
+                    title.className = "text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-300 to-red-600 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] mb-2 uppercase tracking-widest";
+                    subtitle.textContent = "The Boss crushed your hopes...";
+                    subtitle.className = "text-red-300 text-lg font-bold mb-6";
+                }
+
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    box.classList.remove('scale-90');
+                    nameInput.focus();
+                }, 100);
+            }
+
+            function renderLeaderboardTable() {
+                const container = document.getElementById('lb-list-container');
+                container.innerHTML = '';
+                
+                let lbData = JSON.parse(localStorage.getItem('bossGameLeaderboard')) || [];
+                lbData.sort((a, b) => b.score - a.score);
+
+                if(lbData.length === 0) {
+                    container.innerHTML = `<div class="text-gray-400 text-center py-10 font-bold italic">No records found. Be the first!</div>`;
+                    return;
+                }
+
+                lbData.forEach((row, index) => {
+                    const isTop3 = index < 3;
+                    const rankColor = index === 0 ? 'text-yellow-400 drop-shadow-[0_0_8px_yellow]' : index === 1 ? 'text-gray-300 drop-shadow-[0_0_5px_white]' : index === 2 ? 'text-orange-400 drop-shadow-[0_0_5px_orange]' : 'text-blue-300';
+                    const rankIcon = index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+                    
+                    let imgSrc = `Hero/${row.avatarId}.png`;
+                    let fallbackSrc = `Hero/${row.avatarId}.jpg`;
+                    let finalFallback = `https://placehold.co/100x100/1E3A8A/F6C90E?text=${row.name.charAt(0).toUpperCase()}`;
+
+                    const item = document.createElement('div');
+                    item.className = `w-full grid grid-cols-[10%_15%_35%_10%_10%_20%] gap-2 items-center p-2 rounded-lg transition-colors ${isTop3 ? 'bg-gradient-to-r from-blue-800/60 to-blue-900/40 border border-blue-500/30' : 'bg-blue-950/40 hover:bg-blue-800/40'}`;
+                    item.innerHTML = `
+                        <div class="text-xl font-black ${rankColor} text-center">${rankIcon}</div>
+                        <div class="flex justify-center">
+                            <div class="w-10 h-10 rounded-full border-2 ${isTop3 ? 'border-yellow-400 shadow-[0_0_10px_yellow]' : 'border-blue-400'} overflow-hidden bg-white">
+                                <img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}'; this.onerror=function(){this.onerror=null; this.src='${finalFallback}';}" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="text-white font-bold text-left pl-2 truncate" title="${row.name}">${row.name}</div>
+                        <div class="text-green-400 font-bold text-center">${row.correct}</div>
+                        <div class="text-red-400 font-bold text-center">${row.wrong}</div>
+                        <div class="text-yellow-300 font-black text-center drop-shadow-md">${row.score}</div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            document.getElementById('btn-save-score').addEventListener('click', () => {
+                const nameInput = document.getElementById('lb-hero-name');
+                const heroName = nameInput.value.trim() || "Anonymous Hero";
+                const heroId = document.getElementById('hero-avatar-id').value.trim() || "1";
+
+                let lbData = JSON.parse(localStorage.getItem('bossGameLeaderboard')) || [];
+                lbData.push({
+                    name: heroName,
+                    avatarId: heroId,
+                    correct: gameStats.correct,
+                    wrong: gameStats.wrong,
+                    time: gameStats.dmg, 
+                    score: gameStats.finalScore || 0
+                });
+
+                localStorage.setItem('bossGameLeaderboard', JSON.stringify(lbData));
+                
+                document.getElementById('lb-input-state').classList.add('hidden');
+                document.getElementById('lb-board-state').classList.remove('hidden');
+                renderLeaderboardTable();
+            });
+
+            document.getElementById('btn-export-csv').addEventListener('click', () => {
+                let lbData = JSON.parse(localStorage.getItem('bossGameLeaderboard')) || [];
+                lbData.sort((a, b) => b.score - a.score);
+
+                if(lbData.length === 0) {
+                    showCustomAlert("No data to export!");
+                    return;
+                }
+
+                let csvContent = "\uFEFF";
+                csvContent += "Rank,Hero Name,Correct,Wrong,DMG Dealt,Total Score\n";
+
+                lbData.forEach((row, index) => {
+                    const safeName = row.name.replace(/"/g, '""');
+                    csvContent += `${index + 1},"${safeName}",${row.correct},${row.wrong},${row.time},${row.score}\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "BossBattle_Leaderboard.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            document.getElementById('btn-clear-lb').addEventListener('click', () => {
+                showCustomAlert("Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu trên Bảng Xếp Hạng?", "confirm", () => {
+                    localStorage.removeItem('bossGameLeaderboard');
+                    renderLeaderboardTable();
+                });
+            });
+
+            function triggerEndgame(winner) {
+                if (isGameOver) return;
+                isGameOver = true;
+                isGamePaused = true;
+                clearInterval(gameTimerInterval); 
+
+                document.getElementById('hero-skills-container').innerHTML = '';
+                document.getElementById('boss-skills-container').innerHTML = '';
+                
+                if (winner === 'hero') {
+                    playWinSound();
+                    document.getElementById('hero-avatar-wrapper').classList.add('hero-win-glow');
+                    document.getElementById('boss-avatar-container').classList.add('loser-grayscale-shake');
+                    spawnEndgameParticles(); 
+                    showWinnerProps();
+                    spawnLoserTears('boss-avatar-container');
+                } else {
+                    playLoseSound();
+                    document.getElementById('boss-avatar-container').classList.add('hero-win-glow');
+                    document.getElementById('hero-avatar-wrapper').classList.add('loser-grayscale-shake');
+                    spawnEndgameParticles(); 
+                    spawnBossWinOrbit('boss-avatar-container'); 
+                    spawnLoserTears('hero-avatar-wrapper');
+                }
+
+                setTimeout(() => {
+                    showLeaderboardOverlay(winner);
+                }, 3500);
+            }
+
+            function checkWinCondition() {
+                if(isGameOver || !isGameStarted) return;
+                
+                // Mọi Mode đều End Game nếu HP về 0
+                if(currentBossHp <= 0) {
+                    triggerEndgame('hero');
+                } else if(currentHeroHp <= 0) {
+                    triggerEndgame('boss');
+                }
+            }
+
+            function getRandomCard() {
+                if (validCards.length === 0) return null;
+
+                if (currentGameMode === "mode1" || currentGameMode === "mode2") {
+                    if (availableCards.length === 0) return null;
+                    const randomIndex = Math.floor(Math.random() * availableCards.length);
+                    return availableCards.splice(randomIndex, 1)[0];
+                } 
+                else if (currentGameMode === "mode3" || currentGameMode === "mode4") {
+                    if (availableCards.length > 0) {
+                        return availableCards.shift(); 
+                    } else if (wrongCards.length > 0) {
+                        return wrongCards.shift();
+                    }
+                }
+                return null;
+            }
+
+            function renderCardSlot(index, cardData) {
+                const wrapper = document.getElementById(`card-wrapper-${index}`);
+                const imgBox = document.getElementById(`card-${index}-img`).parentElement;
+                const txtBox = document.getElementById(`card-${index}-txt`).parentElement;
+                const cardImg = document.getElementById(`card-${index}-img`);
+                const cardTxt = document.getElementById(`card-${index}-txt`);
+
+                wrapper.classList.remove('hidden', 'shatter-anim');
+                wrapper.style.opacity = '1';
+                
+                if(!cardData) {
+                    wrapper.classList.add('hidden');
+                    activeCards[index-1] = null;
+                    return;
+                }
+
+                activeCards[index-1] = cardData;
+                wrapper.dataset.cardObject = JSON.stringify(cardData);
+
+                if (cardData.id) {
+                    cardImg.src = `images/${cardData.id}.png`;
+                    cardImg.onerror = function() {
+                        if (this.src.includes('.png')) this.src = `images/${cardData.id}.jpg`;
+                        else { this.onerror = null; this.src = `https://placehold.co/500x300/cbd5e1/475569?text=IMG+${cardData.id}`; }
+                    }
+                } else { cardImg.src = `https://placehold.co/500x300/e2e8f0/94a3b8?text=Empty`; }
+                cardTxt.textContent = cardData.text || "";
+
+                const displayMode = document.getElementById('card-display-mode').value || 'both';
+                const txtP = wrapper.querySelector('p');
+                imgBox.classList.remove('hidden', 'flex-[3]', 'flex-[2]', 'flex-[1]', 'mb-1.5');
+                txtBox.classList.remove('hidden', 'flex-[3]', 'flex-[2]', 'flex-[1]');
+                txtP.classList.remove('text-lg', '2xl:text-xl', 'text-2xl', '2xl:text-4xl', 'text-3xl', 'text-5xl', '2xl:text-6xl');
+                
+                if (displayMode === 'both') {
+                    imgBox.classList.add('flex-[3]', 'mb-1.5'); txtBox.classList.add('flex-[1]'); txtP.classList.add('text-3xl', '2xl:text-4xl'); 
+                } else if (displayMode === 'image') {
+                    imgBox.classList.add('flex-1'); txtBox.classList.add('hidden');
+                } else if (displayMode === 'text') {
+                    imgBox.classList.add('hidden'); txtBox.classList.add('flex-1'); txtP.classList.add('text-5xl', '2xl:text-6xl');
+                }
+            }
+
+            function fillBoard() {
+                if(isGameOver || !isGameStarted) return;
+                for(let i=1; i<=3; i++) {
+                    if(!activeCards[i-1]) {
+                        const newCard = getRandomCard();
+                        if (newCard) renderCardSlot(i, newCard);
+                    }
+                }
+            }
+
+            // Xử lý Logic chính xác cho từng Mode khi sạch Bài
+            function handleEmptyDeckAndBoard() {
+                if (currentGameMode === "mode1") {
+                    // Cạn bài, End Game luôn, so sánh % HP
+                    const heroPct = currentHeroHp / heroMaxHp;
+                    const bossPct = currentBossHp / bossMaxHp;
+                    triggerEndgame(heroPct >= bossPct ? 'hero' : 'boss');
+                } 
+                else if (currentGameMode === "mode2" || currentGameMode === "mode3") {
+                    if (wrongCards.length > 0) {
+                        // Mang giỏ sai ra hỏi lại
+                        availableCards = [...wrongCards];
+                        wrongCards = [];
+                        fillBoard();
+                    } else {
+                        // Đúng hết 100%, lặp vòng mới vô tận (Khôi phục toàn bộ bài)
+                        availableCards = [...validCards];
+                        fillBoard();
+                    }
+                } 
+                else if (currentGameMode === "mode4") {
+                    if (wrongCards.length > 0) {
+                        // Mang giỏ sai ra hỏi lại
+                        availableCards = [...wrongCards];
+                        wrongCards = [];
+                        fillBoard();
+                    } else {
+                        // Đúng hết 100%, End Game
+                        const heroPct = currentHeroHp / heroMaxHp;
+                        const bossPct = currentBossHp / bossMaxHp;
+                        triggerEndgame(heroPct >= bossPct ? 'hero' : 'boss');
+                    }
+                }
+            }
+
+            function handleCardSuccess(index) {
+                if(isGameOver || isGamePaused || isAnimating || isHeroParalyzed || !isGameStarted) return;
+                const wrapper = document.getElementById(`card-wrapper-${index}`);
+                
+                if (wrapper.classList.contains('shatter-anim')) return;
+                
+                playTingSound(); 
+                gameStats.correct++; 
+                wrapper.classList.add('shatter-anim');
+
+                setTimeout(() => {
+                    activeCards[index-1] = null;
+                    wrapper.classList.add('hidden');
+                    wrapper.classList.remove('shatter-anim'); 
+                    
+                    if(currentMana < MAX_MANA) {
+                        currentMana++;
+                        updateManaUI();
+                    }
+                    
+                    const isBoardEmpty = activeCards.every(c => c === null);
+                    if (isBoardEmpty && availableCards.length === 0) {
+                        handleEmptyDeckAndBoard();
+                    } else if (currentMana === 5 || currentMana === 10 || isBoardEmpty) {
+                        fillBoard();
+                    }
+                }, 400); 
+            }
+
+            function handleCardPenalty(index) {
+                if(isGameOver || isGamePaused || isAnimating || isHeroParalyzed || !isGameStarted) return;
+                const wrapper = document.getElementById(`card-wrapper-${index}`);
+                
+                if (wrapper.classList.contains('flash-effect') || wrapper.classList.contains('shatter-anim')) return;
+
+                playErrorSound(); 
+                gameStats.wrong++; 
+                wrapper.classList.add('flash-effect');
+
+                // Nếu không phải Mode 1, đưa thẻ sai vào giỏ (wrongCards)
+                if (["mode2", "mode3", "mode4"].includes(currentGameMode) && activeCards[index-1]) {
+                    wrongCards.push(activeCards[index-1]);
+                }
+
+                if (currentMana > 0) {
+                    currentMana--;
+                    updateManaUI();
+                }
+
+                setTimeout(() => {
+                    wrapper.classList.remove('flash-effect');
+                    activeCards[index-1] = null; 
+                    
+                    const isBoardEmpty = activeCards.every(c => c === null);
+                    if (isBoardEmpty && availableCards.length === 0) {
+                        handleEmptyDeckAndBoard();
+                    } else {
+                        fillBoard();
+                    }
+                }, 400);
+            }
+
+            document.querySelectorAll('.card-clickable').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if(e.target.closest('.reroll-btn')) return;
+                    handleCardSuccess(parseInt(this.dataset.card));
+                });
+            });
+
+            document.querySelectorAll('.reroll-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    handleCardPenalty(parseInt(this.dataset.card));
+                });
+            });
+            
+            document.getElementById('btn-lb-restart').addEventListener('click', () => {
+                document.getElementById('leaderboard-overlay').classList.add('opacity-0');
+                document.getElementById('leaderboard-box').classList.add('scale-90');
+                setTimeout(() => {
+                    document.getElementById('leaderboard-overlay').classList.add('hidden');
+                    updateGameUI();
+                }, 500); 
+            });
+
+            startBattleBtn.addEventListener('click', () => {
+                startOverlay.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    startOverlay.classList.add('hidden');
+                    startOverlay.classList.remove('opacity-0');
+                    
+                    // Chính thức bật Game
+                    isGameStarted = true;
+                    isGameOver = false;
+                    isGamePaused = false;
+                    
+                    document.getElementById('stop-game-btn').classList.remove('hidden');
+                    document.getElementById('pause-game-btn').classList.remove('hidden');
+                    
+                    startGameTimer();
+                    fillBoard();
+                }, 500);
+            });
+
+            function reloadHeroSkills() {
+                sessionHeroSkills = [];
+                const validHeroSkillIds = ['h_s1', 'h_s3', 'h_s5', 'h_s7'];
+                validHeroSkillIds.forEach(id => {
+                    const input = document.querySelector(`input[data-save="${id}_qty"]`);
+                    const qty = input ? parseInt(input.value) : 0;
+                    if(qty > 0) sessionHeroSkills.push({ id: id, icon: HERO_SKILL_ICONS[id], qty: qty });
+                });
+            }
+
+            function updateHeroSkillsUI() {
+                const container = document.getElementById('hero-skills-container');
+                if(!container) return;
+                container.innerHTML = '';
+                
+                const numCols = Math.ceil(sessionHeroSkills.length / 4);
+                if (numCols <= 2) container.style.gap = '14px'; else container.style.gap = '10px'; 
+                
+                sessionHeroSkills.forEach(skill => {
+                    const isActive = activeSkillsOnBoard.includes(skill.id);
+                    const btn = document.createElement('button');
+                    
+                    btn.className = `w-12 h-12 rounded-xl flex items-center justify-center text-xl relative transition-all shrink-0 ${
+                        isActive 
+                        ? 'bg-gradient-to-br from-cyan-900 to-blue-900 border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)] cursor-pointer hover:scale-110 hover:brightness-125' 
+                        : 'bg-gray-800/80 border-2 border-gray-600 opacity-40 shadow-inner cursor-not-allowed'
+                    }`;
+                    
+                    btn.innerHTML = `
+                        ${skill.icon}
+                        <span class="absolute -top-1.5 -right-1.5 w-[22px] h-[22px] bg-red-600 text-white text-[11px] font-black flex items-center justify-center rounded-full shadow-md border-2 border-white z-10">${skill.qty}</span>
+                        ${isActive ? '<span class="absolute top-1 right-1 flex h-2 w-2 z-0"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span></span>' : ''}
+                    `;
+                    
+                    if (isActive) btn.addEventListener('click', () => { useHeroSkill(skill.id); });
+                    container.appendChild(btn);
+                });
+            }
+
+            function useHeroSkill(skillId) {
+                if (isGameOver || isGamePaused || isAnimating || isHeroParalyzed || !isGameStarted) return; 
+                if (currentMana < 5) return; 
+                currentMana -= 5;
+                
+                const skillObj = sessionHeroSkills.find(s => s.id === skillId);
+                if(skillObj) {
+                    skillObj.qty -= 1;
+                    if(skillObj.qty <= 0) sessionHeroSkills = sessionHeroSkills.filter(s => s.id !== skillId);
+                }
+                
+                if (sessionHeroSkills.length === 0) reloadHeroSkills();
+
+                activeSkillsOnBoard = activeSkillsOnBoard.filter(id => id !== skillId);
+                updateManaUI(); 
+
+                if (skillId === 'h_s3') {
+                    const dmgConfig = parseInt(document.querySelector(`input[data-save="h_s3_v1"]`)?.value) || 50;
+                    executeFireballSkill(dmgConfig);
+                } else if (skillId === 'h_s5') {
+                    isDoubleStrikeActive = true;
+                    document.getElementById('btn-bow').classList.add('bow-buffed');
+                    playChargeSound();
+                    if (activeCards.every(c => c === null) && availableCards.length > 0) fillBoard();
+                } else if (skillId === 'h_s1') {
+                    const durationStr = document.querySelector(`input[data-save="h_s1_v1"]`)?.value || '5';
+                    executeFreezeSkill(durationStr);
+                } else if (skillId === 'h_s7') {
+                    const dmgConfig = parseInt(document.querySelector(`input[data-save="h_s7_v1"]`)?.value) || 5;
+                    executeFriendPowerSkill(dmgConfig);
+                } else {
+                    playTingSound(); 
+                    if (activeCards.every(c => c === null) && availableCards.length > 0) fillBoard();
+                }
+            }
+
+            function checkSkillActivations() {
+                const targetActiveCount = Math.floor(currentMana / 5);
+                activeSkillsOnBoard = activeSkillsOnBoard.filter(id => sessionHeroSkills.some(s => s.id === id));
+                while(activeSkillsOnBoard.length > targetActiveCount) activeSkillsOnBoard.pop();
+                while(activeSkillsOnBoard.length < targetActiveCount) {
+                    const candidates = sessionHeroSkills.filter(s => !activeSkillsOnBoard.includes(s.id));
+                    if(candidates.length === 0) break;
+                    const randomCandidate = candidates[Math.floor(Math.random() * candidates.length)];
+                    activeSkillsOnBoard.push(randomCandidate.id);
+                }
+                updateHeroSkillsUI();
+            }
+
+            function updateManaUI() {
+                document.getElementById('current-mana-text').textContent = currentMana;
+                const manaFluid = document.getElementById('mana-fluid');
+                const heightPercent = (currentMana / MAX_MANA) * 100;
+                manaFluid.style.height = `${heightPercent}%`;
+
+                checkSkillActivations();
+                updateWeaponStatsUI();
+                
+                if (currentMana >= MAX_MANA) {
+                    document.querySelectorAll('.basic-weapon-btn').forEach(btn => btn.classList.add('animate-pulse', 'ring-4', 'ring-yellow-400'));
+                } else {
+                    document.querySelectorAll('.basic-weapon-btn').forEach(btn => btn.classList.remove('animate-pulse', 'ring-4', 'ring-yellow-400'));
+                }
+            }
+
+            document.querySelectorAll('.basic-weapon-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (isGameOver || isGamePaused || isAnimating || isHeroParalyzed || !isGameStarted) return; 
+                    if (currentMana < 1) return;
+
+                    const isBow = e.currentTarget.innerText.includes('🏹');
+                    const isHeal = e.currentTarget.innerText.includes('✚');
+                    const isShield = e.currentTarget.innerText.includes('🛡️');
+
+                    const atkPerMana = parseInt(document.getElementById('hero-mana-atk').value) || 10;
+                    const defPerMana = parseInt(document.getElementById('hero-mana-def').value) || 5;
+                    const healPerMana = parseInt(document.getElementById('hero-mana-heal').value) || 15;
+
+                    let manaUsed = 0;
+
+                    if (isHeal) {
+                        const hpNeeded = heroMaxHp - currentHeroHp;
+                        if (hpNeeded <= 0) {
+                            spawnFloatingText('hero-fx-container', 'MAX HP', 'text-green-400 text-2xl');
+                            return; 
+                        }
+                        const manaNeeded = Math.ceil(hpNeeded / healPerMana);
+                        manaUsed = Math.min(currentMana, manaNeeded);
+                    } 
+                    else if (isShield) {
+                        const shieldNeeded = heroMaxShield - currentHeroShield;
+                        if (shieldNeeded <= 0) {
+                            spawnFloatingText('hero-fx-container', 'MAX SHIELD', 'text-cyan-400 text-2xl');
+                            return; 
+                        }
+                        const manaNeeded = Math.ceil(shieldNeeded / defPerMana);
+                        manaUsed = Math.min(currentMana, manaNeeded);
+                    } 
+                    else if (isBow) {
+                        manaUsed = currentMana;
+                    }
+
+                    if (manaUsed <= 0) return; 
+
+                    currentMana -= manaUsed;
+                    updateManaUI(); 
+                    
+                    if (isBow) {
+                        const damage = manaUsed * atkPerMana;
+                        executeBowAttack(damage); 
+                    } else if (isHeal) {
+                        const healAmt = manaUsed * healPerMana;
+                        currentHeroHp = Math.min(heroMaxHp, currentHeroHp + healAmt);
+                        gameStats.heal += healAmt;
+                        triggerHeal('hero', healAmt); 
+                        updateHpUI();
+                    } else if (isShield) {
+                        playShieldSound();
+                        const shieldAmt = manaUsed * defPerMana;
+                        const previousShield = currentHeroShield;
+                        currentHeroShield = Math.min(heroMaxShield, currentHeroShield + shieldAmt);
+                        gameStats.shield += (currentHeroShield - previousShield);
+                        updateHpUI();
+                    }
+
+                    if (activeCards.every(c => c === null) && availableCards.length > 0) fillBoard();
+                });
+            });
+
+            function drawNextBossSkill() {
+                if (initialBossDeck.length === 0) {
+                    nextBossSkillId = null;
+                    updateBossSkillsUI(); return;
+                }
+                if (currentBossDeck.length === 0) currentBossDeck = [...initialBossDeck]; 
+                
+                const randomIndex = Math.floor(Math.random() * currentBossDeck.length);
+                nextBossSkillId = currentBossDeck.splice(randomIndex, 1)[0];
+                updateBossSkillsUI();
+            }
+
+            function updateBossSkillsUI() {
+                const container = document.getElementById('boss-skills-container');
+                if (!container) return;
+                container.innerHTML = '';
+                
+                const uniqueSkills = [...new Set(initialBossDeck)];
+                
+                uniqueSkills.forEach(skillId => {
+                    const isNext = (skillId === nextBossSkillId);
+                    const btn = document.createElement('div');
+                    
+                    if (isNext) {
+                        btn.className = `w-12 h-12 rounded-lg bg-red-900/80 border-2 border-red-500 flex items-center justify-center text-2xl shadow-[0_0_15px_red] animate-pulse relative`;
+                        btn.innerHTML = `
+                            ${BOSS_SKILL_ICONS[skillId]}
+                            <span class="absolute -top-1.5 -right-1.5 w-[22px] h-[22px] bg-red-600 text-white text-[11px] font-black flex items-center justify-center rounded-full shadow-md border-2 border-white z-10">☠️</span>
+                        `;
+                    } else {
+                        btn.className = `w-12 h-12 rounded-lg bg-gray-800 border border-gray-600 flex items-center justify-center text-2xl opacity-50 grayscale transition-opacity`;
+                        btn.innerHTML = BOSS_SKILL_ICONS[skillId];
+                    }
+                    container.appendChild(btn);
+                });
+            }
+
+            function triggerBossSkill() {
+                if(isGameOver || !isGameStarted) return;
+                const container = document.getElementById('boss-wrapper-anim');
+                if (container && !isBossFrozen && !isBossSleeping) {
+                    BOSS_BORDER_COLORS.forEach(c => container.classList.remove(c));
+                    const newColor = BOSS_BORDER_COLORS[Math.floor(Math.random() * BOSS_BORDER_COLORS.length)];
+                    container.classList.add(newColor);
+                }
+
+                const skillId = nextBossSkillId || 'b_s1';
+                let param1 = parseInt(document.querySelector(`input[data-save="${skillId}_v1"]`)?.value) || 10;
+                let param2 = parseInt(document.querySelector(`input[data-save="${skillId}_v2"]`)?.value) || 5;
+                
+                if (isEnraged && (skillId === 'b_s1' || skillId === 'b_s6')) {
+                    param1 = Math.floor(param1 * suddenDeathBuffMult);
+                }
+
+                if (skillId === 'b_s1') {
+                    executeBossFoodAttack(param1);
+                } else if (skillId === 'b_s6') {
+                    executeBossThunderSkill(param1);
+                } else if (skillId === 'b_s8') {
+                    executeBossConfusionSkill(param1);
+                } else if (skillId === 'b_s9') {
+                    executeBossRestSkill(param1, param2);
+                }
+
+                drawNextBossSkill();
+            }
+
+            // Khôi phục & Render dữ liệu Game
+            function updateGameUI() {
+                isGameStarted = false;
+                isGameOver = false;
+                isGamePaused = false;
+                isHeroParalyzed = false;
+                isBossSleeping = false;
+                currentBossShield = 0;
+                clearTimeout(bossSleepTimer);
+                clearInterval(bossZzzInterval);
+                clearInterval(gameTimerInterval); 
+
+                // Hiện lại màn hình Start và Ẩn nút Stop/Pause
+                startOverlay.classList.remove('hidden', 'opacity-0');
+                document.getElementById('stop-game-btn').classList.add('hidden');
+                document.getElementById('pause-game-btn').classList.add('hidden');
+                
+                const heroRoundedWrapper = document.getElementById('hero-avatar-wrapper');
+                const bossContainer = document.getElementById('boss-avatar-container');
+                heroRoundedWrapper.classList.remove('hero-win-glow', 'loser-grayscale-shake');
+                bossContainer.classList.remove('hero-win-glow', 'loser-grayscale-shake', 'shadow-[0_0_50px_red]', 'border-red-600');
+                
+                const heroAnimBox = document.getElementById('hero-anim-box');
+                if (heroAnimBox) heroAnimBox.style.zIndex = '10';
+                const heroCore = document.getElementById('hero-core-wrapper');
+                if (heroCore) heroCore.style.zIndex = '10';
+                
+                isEnraged = false;
+                const sdTimeVal = parseFloat(document.getElementById('sudden-death-time').value) || 3;
+                suddenDeathTimerSec = sdTimeVal * 60;
+                const sdBuvvVal = parseFloat(document.getElementById('sudden-death-buff').value) || 200;
+                suddenDeathBuffMult = sdBuvvVal / 100;
+
+                updateEnrageTimerUI(suddenDeathTimerSec);
+
+                const propsWrapper = document.getElementById('hero-win-props');
+                if(propsWrapper) {
+                    propsWrapper.classList.add('opacity-0');
+                    propsWrapper.classList.remove('pop-up-epic');
+                }
+
+                document.querySelectorAll('.tear-drop-anim, .particle-fall, .orbit-system').forEach(el => el.remove());
+
+                gameStats = { correct: 0, wrong: 0, dmg: 0, shield: 0, heal: 0 };
+
+                document.getElementById('boss-shield-bubble').style.opacity = '0';
+                document.getElementById('boss-shield-text').classList.replace('opacity-100', 'opacity-0');
+
+                document.getElementById('thunder-hero-lock').classList.add('hidden');
+                document.getElementById('thunder-card-lock').classList.add('hidden');
+                
+                const pauseIcon = document.getElementById('pause-icon');
+                const playIcon = document.getElementById('play-icon');
+                const pauseOverlay = document.getElementById('pause-overlay');
+                const pauseBtn = document.getElementById('pause-game-btn');
+
+                pauseIcon.classList.remove('hidden');
+                playIcon.classList.add('hidden');
+                pauseOverlay.classList.add('hidden');
+                pauseBtn.classList.replace('bg-green-500', 'bg-yellow-500');
+                pauseBtn.classList.replace('hover:bg-green-600', 'hover:bg-yellow-600');
+
+                heroMaxHp = parseInt(document.getElementById('hero-max-hp').value) || 100;
+                bossMaxHp = parseInt(document.getElementById('boss-max-hp').value) || 1000;
+                heroMaxShield = parseInt(document.getElementById('hero-max-shield').value) || 50;
+                
+                currentHeroHp = heroMaxHp;
+                currentBossHp = bossMaxHp;
+                currentHeroShield = 0;
+                updateHpUI();
+
+                // Setup Avatars (Game Board & Start Screen)
+                const heroId = document.getElementById('hero-avatar-id').value.trim();
+                const mainHeroAvatar = document.getElementById('main-hero-avatar');
+                const startHeroAvatar = document.getElementById('start-hero-avatar');
+                
+                if (heroId) {
+                    const fallbackLogic = function() {
+                        if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
+                        else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
+                    };
+                    mainHeroAvatar.src = `Hero/${heroId}.png`;
+                    mainHeroAvatar.onerror = fallbackLogic;
+                    
+                    if(startHeroAvatar) {
+                        startHeroAvatar.src = `Hero/${heroId}.png`;
+                        startHeroAvatar.onerror = fallbackLogic;
+                    }
+                }
+
+                let bossThemeVal = document.getElementById('boss-theme-id').value.trim() || "12582594"; 
+                const bossAvatarContainer = document.getElementById('boss-avatar-container');
+                const startBossContainer = document.getElementById('start-boss-avatar-container');
+                
+                const tenorUrlMatch = bossThemeVal.match(/tenor\.com\/view\/.*-(\d+)$/);
+                if (tenorUrlMatch) { bossThemeVal = tenorUrlMatch[1]; }
+
+                let bossHtmlContent = '';
+                if (bossThemeVal.match(/^\d+$/)) {
+                    bossHtmlContent = `<iframe src="https://tenor.com/embed/${bossThemeVal}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`;
+                } else {
+                    bossHtmlContent = `<img src="${bossThemeVal}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null; this.src='https://placehold.co/400x400/1e293b/cbd5e1?text=LỖI+LINK+ẢNH';" />`;
+                }
+                
+                bossAvatarContainer.innerHTML = bossHtmlContent;
+                if(startBossContainer) startBossContainer.innerHTML = bossHtmlContent;
+
+                // Setup Background
+                let bgThemeVal = document.getElementById('game-bg-id').value.trim();
+                let bgOpacityVal = document.getElementById('game-bg-opacity').value.trim();
+                let opacityNum = parseInt(bgOpacityVal);
+                if (isNaN(opacityNum)) opacityNum = 40;
+                
+                const bgContainer = document.getElementById('dynamic-bg-container');
+                bgContainer.style.opacity = opacityNum / 100;
+                
+                if (bgThemeVal) {
+                    const tenorUrlMatchBg = bgThemeVal.match(/tenor\.com\/view\/.*-(\d+)$/);
+                    if (tenorUrlMatchBg) bgThemeVal = tenorUrlMatchBg[1]; 
+
+                    if (bgThemeVal.match(/^\d+$/)) {
+                        bgContainer.innerHTML = `<iframe src="https://tenor.com/embed/${bgThemeVal}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none w-full h-full scale-[1.5] object-cover" allowtransparency="true"></iframe>`;
+                    } else {
+                        bgContainer.innerHTML = `<img src="${bgThemeVal}" class="w-full h-full object-cover pointer-events-none" onerror="this.onerror=null; this.style.display='none';" />`;
+                    }
+                } else {
+                    bgContainer.innerHTML = '';
+                }
+
+                const savedGrid = localStorage.getItem('bossGameGridData');
+                validCards = [];
+                if (savedGrid) {
+                    try {
+                        const gridRaw = JSON.parse(savedGrid);
+                        gridRaw.forEach(row => {
+                            if (row.id.trim() !== '' || row.text.trim() !== '') {
+                                validCards.push(row);
+                                if(row.priority) {
+                                    validCards.push({...row}); 
+                                    validCards.push({...row}); 
+                                }
+                            }
+                        });
+                    } catch(e) { validCards = []; }
+                }
+
+                if (validCards.length === 0) {
+                    validCards = [
+                        { id: "", text: "Thẻ bài mẫu số 1. Hãy mở Cài Đặt để thêm." },
+                        { id: "", text: "Đây là thẻ bài mẫu số 2." },
+                        { id: "", text: "Đây là thẻ bài mẫu số 3." },
+                        { id: "", text: "Đây là thẻ bài mẫu số 4." }
+                    ];
+                }
+
+                currentGameMode = document.getElementById('game-mode-select').value || "mode1";
+                availableCards = [...validCards]; 
+                wrongCards = [];
+
+                reloadHeroSkills();
+                activeSkillsOnBoard = [];
+
+                initialBossDeck = [];
+                const validBossSkillIds = ['b_s1', 'b_s6', 'b_s8', 'b_s9'];
+                validBossSkillIds.forEach(id => {
+                    const input = document.querySelector(`input[data-save="${id}_qty"]`);
+                    const qty = input ? parseInt(input.value) : 0;
+                    for(let j=0; j<qty; j++) {
+                        initialBossDeck.push(id);
+                    }
+                });
+                currentBossDeck = [...initialBossDeck];
+                drawNextBossSkill();
+
+                currentMana = 0;
+                isDoubleStrikeActive = false;
+                document.getElementById('btn-bow').classList.remove('bow-buffed');
+                updateManaUI();
+                
+                for(let i=1; i<=3; i++) {
+                    const wrapper = document.getElementById(`card-wrapper-${i}`);
+                    wrapper.classList.add('hidden');
+                    activeCards[i-1] = null;
+                }
+            }
+
+            const heroAvatarInput = document.getElementById('hero-avatar-id');
+            const heroAvatarPreview = document.getElementById('hero-avatar-preview');
+            if (heroAvatarInput && heroAvatarPreview) {
+                heroAvatarInput.addEventListener('input', function() {
+                    const val = this.value.trim();
+                    if(val) {
+                        heroAvatarPreview.src = `Hero/${val}.png`;
+                        heroAvatarPreview.onerror = function() {
+                            if (this.src.includes('.png')) this.src = `Hero/${val}.jpg`;
+                            else { this.onerror = null; this.src = `https://placehold.co/40x40/e2e8f0/64748b?text=${val}`; }
+                        };
+                    } else {
+                        heroAvatarPreview.src = `https://placehold.co/40x40/e2e8f0/64748b?text=N/A`;
+                    }
+                });
+            }
+
+            const allSettingsInputs = document.querySelectorAll('#tab-data select, #tab-data input:not(.excel-input), #tab-hero-boss input, #tab-hero-boss select, #tab-skills input, #tab-skills select');
+            const savePlayBtn = document.getElementById('save-and-close-btn');
+
+            function saveAllData() {
+                const gridData = [];
+                for(let i = 1; i <= currentRowCount; i++) {
+                    const idInp = document.querySelector(`.excel-input[data-col="id"][data-row="${i}"]`);
+                    const textInp = document.querySelector(`.excel-input[data-col="text"][data-row="${i}"]`);
+                    const prioInp = document.querySelector(`.custom-checkbox[data-col="priority"][data-row="${i}"]`);
+                    if(idInp && textInp) {
+                        if (idInp.value.trim() !== '' || textInp.value.trim() !== '') {
+                            gridData.push({ id: idInp.value, text: textInp.value, priority: prioInp ? prioInp.checked : false });
+                        }
+                    }
+                }
+                localStorage.setItem('bossGameGridData', JSON.stringify(gridData));
+
+                const settingsData = {};
+                allSettingsInputs.forEach(input => {
+                    const key = input.id || input.dataset.save;
+                    if(key) {
+                        if(input.type === 'checkbox') settingsData[key] = input.checked;
+                        else settingsData[key] = input.value;
+                    }
+                });
+                localStorage.setItem('bossGameSettingsData', JSON.stringify(settingsData));
+                
+                updateGameUI();
+                const originalText = savePlayBtn.innerHTML;
+                savePlayBtn.innerHTML = "✅ ĐÃ LƯU THÀNH CÔNG";
+                savePlayBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                
+                setTimeout(() => {
+                    savePlayBtn.innerHTML = originalText;
+                    savePlayBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                    closeModal();
+                }, 800);
+            }
+
+            function loadAllData() {
+                const savedGrid = localStorage.getItem('bossGameGridData');
+                if (savedGrid) {
+                    try {
+                        const gridData = JSON.parse(savedGrid);
+                        const neededRows = Math.max(5, gridData.length);
+                        tbody.innerHTML = '';
+                        currentRowCount = 0;
+                        for(let i=1; i<=neededRows; i++) createGridRow(i);
+
+                        gridData.forEach((row, index) => {
+                            const r = index + 1;
+                            const idInput = document.querySelector(`.excel-input[data-col="id"][data-row="${r}"]`);
+                            if (idInput) {
+                                idInput.value = row.id || '';
+                                document.querySelector(`.excel-input[data-col="text"][data-row="${r}"]`).value = row.text || '';
+                                const prioInp = document.querySelector(`.custom-checkbox[data-col="priority"][data-row="${r}"]`);
+                                if(prioInp) prioInp.checked = row.priority || false;
+                                if(row.id) idInput.dispatchEvent(new Event('input'));
+                            }
+                        });
+                    } catch(e) { console.error("Error loading grid data:", e); }
+                }
+
+                const savedSettings = localStorage.getItem('bossGameSettingsData');
+                if (savedSettings) {
+                    try {
+                        const settingsData = JSON.parse(savedSettings);
+                        allSettingsInputs.forEach(input => {
+                            const key = input.id || input.dataset.save;
+                            if(key && settingsData[key] !== undefined) {
+                                if(input.type === 'checkbox') input.checked = settingsData[key];
+                                else input.value = settingsData[key];
+                            }
+                        });
+                        const heroAvatarInput = document.getElementById('hero-avatar-id');
+                        if(heroAvatarInput) heroAvatarInput.dispatchEvent(new Event('input'));
+                    } catch(e) { console.error("Error loading settings data:", e); }
+                }
+            }
+
+            savePlayBtn.addEventListener('click', saveAllData);
+            loadAllData();
+            updateGameUI(); 
+            
+            let ragePercent = 0;
+            setInterval(() => {
+                if (!isGameStarted || isGameOver || isGamePaused || isAnimating || isBossFrozen || isBossSleeping) return; 
+
+                let rageTimeSec = parseFloat(document.getElementById('boss-rage-time').value) || 15;
+                if (isEnraged) {
+                    rageTimeSec = rageTimeSec / suddenDeathBuffMult; 
+                }
+
+                const totalTicks = (rageTimeSec * 1000) / 50; 
+                const increment = 100 / totalTicks;
+                
+                ragePercent += increment; 
+                if(ragePercent >= 100) {
+                    ragePercent = 0;
+                    triggerBossSkill();
+                }
+                
+                const rageBar = document.getElementById('boss-rage-bar');
+                const rageIcon = document.getElementById('boss-rage-icon');
+                
+                if(rageBar && rageIcon) {
+                    rageBar.style.width = `${ragePercent}%`;
+                    if(ragePercent < 50) {
+                        rageBar.className = "h-full bg-yellow-400 rounded-full shadow-[0_0_10px_yellow] transition-all duration-200 ease-linear";
+                        rageIcon.innerText = "💢";
+                        rageIcon.className = "text-3xl drop-shadow-[0_0_5px_yellow] transition-all duration-300 scale-100 grayscale-[30%]";
+                    } else if (ragePercent < 85) {
+                        rageBar.className = "h-full bg-orange-500 rounded-full shadow-[0_0_15px_orange] transition-all duration-200 ease-linear";
+                        rageIcon.innerText = "🔥";
+                        rageIcon.className = "text-3xl drop-shadow-[0_0_10px_orange] transition-all duration-300 scale-125";
+                    } else {
+                        rageBar.className = "h-full bg-red-600 rounded-full shadow-[0_0_20px_red] transition-all duration-200 ease-linear animate-pulse";
+                        rageIcon.innerText = "🔥";
+                        rageIcon.className = "text-3xl drop-shadow-[0_0_20px_red] transition-all duration-300 scale-150 animate-pulse text-red-500";
+                    }
+                }
+            }, 50);
+        });
+    </script>
+</body>
+</html>
