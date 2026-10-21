@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boss Thả Junk Food - Boss Battle</title>
-    <link rel="icon" type="image/png" href="logo.png?v=1">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script>
@@ -30,7 +30,7 @@
         .excel-input.text-center { text-align: center; }
         .excel-cell.focused { outline: 2px solid #3B82F6; outline-offset: -2px; z-index: 5; }
         .custom-checkbox { width: 1.2rem; height: 1.2rem; cursor: pointer; }
-        .table-container { max-height: 60vh; overflow-y: auto; overflow-x: auto; }
+        .table-container { max-height: 560px; overflow-y: auto; overflow-x: auto; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -170,9 +170,16 @@
             transform: translate(-50%, -50%);
             animation: orbit-counter-spin 6s linear infinite;
         }
+        /* --- Gói nâng cấp: auto-fit màn hình + kho ảnh --- */
+        #stage { width: 1920px; height: 1080px; position: relative; transform-origin: center center; }
+        .id-missing { outline: 3px dashed #ef4444 !important; outline-offset: -3px; animation: id-blink 1s ease-in-out infinite; }
+        @keyframes id-blink { 0%, 100% { background-color: rgba(239,68,68,0.10); } 50% { background-color: rgba(239,68,68,0.32); } }
+        #pool-dropzone.dragover { border-color: #f59e0b; background: #fef3c7; transform: scale(1.01); }
+        .pool-thumb:hover img { border-color: #f59e0b; }
     </style>
 </head>
 <body class="font-sans h-screen w-screen overflow-hidden flex items-center justify-center relative bg-gray-900">
+    <div id="stage">
 
     <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-[9999]"></div>
 
@@ -214,7 +221,7 @@
         </div>
 
         <div id="leaderboard-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-lg z-[9990] hidden flex items-center justify-center opacity-0 transition-opacity duration-1000">
-            <div class="bg-gradient-to-b from-blue-900 to-indigo-950 w-[700px] max-h-[90vh] rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.6)] border-4 border-yellow-400 p-8 text-center relative flex flex-col transform scale-90 transition-transform duration-700" id="leaderboard-box">
+            <div class="bg-gradient-to-b from-blue-900 to-indigo-950 w-[700px] max-h-[972px] rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.6)] border-4 border-yellow-400 p-8 text-center relative flex flex-col transform scale-90 transition-transform duration-700" id="leaderboard-box">
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-screen pointer-events-none z-0 rounded-3xl"></div>
                 
                 <div id="lb-input-state" class="relative z-10 flex flex-col items-center w-full">
@@ -502,7 +509,7 @@
     </button>
 
     <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center opacity-0 pointer-events-none">
-        <div class="bg-edKem w-11/12 max-w-[1400px] h-[95vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border-4 border-edNavy transform transition-transform scale-95 duration-200" id="modal-content">
+        <div class="bg-edKem w-11/12 max-w-[1400px] h-[1026px] rounded-2xl shadow-2xl flex flex-col overflow-hidden border-4 border-edNavy transform transition-transform scale-95 duration-200" id="modal-content">
             
             <div class="bg-edNavy text-white px-6 py-4 flex justify-between items-center shrink-0">
                 <div class="flex items-center gap-3">
@@ -568,12 +575,36 @@
                         </button>
                     </div>
 
+                    <div class="shrink-0 bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-amber-500 mb-4">
+                        <div class="flex items-center justify-between flex-wrap gap-3">
+                            <div class="flex-1 min-w-[260px]">
+                                <h3 class="font-extrabold text-edNavy text-lg leading-tight">📦 KHO ẢNH (upload ngay từ máy tính)</h3>
+                                <p class="text-xs text-gray-500 mt-1">Ảnh nhận <b>SỐ ID</b> theo tên file: ảnh <b>3.png</b> → gõ <b>3</b> vào cột <b>ID ẢNH</b>. Ảnh dán vào đây là lưu luôn trong máy, không cần link.</p>
+                            </div>
+                            <div class="flex gap-2 items-center flex-wrap">
+                                <span id="pool-count" class="text-sm font-black text-amber-700 bg-amber-100 px-3 py-1.5 rounded-lg">0 ảnh</span>
+                                <span id="pool-size" class="text-sm font-bold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg">0 MB</span>
+                                <button id="btn-pool-upload" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">⬆️ Thêm ảnh</button>
+                                <button id="btn-pool-cleanid" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">🧹 Dọn ID</button>
+                                <button id="btn-pool-delselected" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">🗑️ Xóa ảnh đã chọn</button>
+                                <button id="btn-backup" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">💾 Sao lưu (file .json)</button>
+                                <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition cursor-pointer">📂 Khôi phục<input type="file" id="restore-file" accept="application/json,.json" class="hidden"></label>
+                            </div>
+                        </div>
+                        <div id="pool-dropzone" class="mt-3 border-2 border-dashed border-amber-300 rounded-xl p-3 text-center text-sm text-amber-700 bg-amber-50/50 transition">
+                            🖼️ Kéo thả ảnh vào đây (chọn nhiều ảnh 1 lần cũng được), hoặc bấm <b>⬆️ Thêm ảnh</b>
+                        </div>
+                        <div id="pool-errors" class="mt-2 text-xs text-red-600 font-semibold"></div>
+                        <div id="pool-grid" class="mt-3 flex flex-wrap gap-2 max-h-[128px] overflow-y-auto pr-1"></div>
+                        <input type="file" id="pool-file" accept="image/*" multiple class="hidden">
+                    </div>
+
                     <div class="table-container bg-white rounded-xl shadow-sm border border-gray-300 flex-grow relative">
                         <table class="excel-table" id="data-grid">
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">#</th>
-                                    <th style="width: 250px;" class="text-left">ID-IMAGE (images/...)</th>
+                                    <th style="width: 250px;" class="text-left">ID ẢNH (xem 📦 Kho ảnh)</th>
                                     <th style="width: auto;" class="text-left">TEXT (Câu hỏi)</th>
                                     <th style="width: 150px;">
                                         <div class="flex flex-col items-center gap-1">
@@ -819,6 +850,7 @@
             <div class="flex justify-center gap-4" id="custom-alert-buttons"></div>
         </div>
     </div>
+    </div><!-- /#stage -->
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1672,13 +1704,19 @@
                     input.addEventListener('input', function() {
                         const rowId = this.dataset.row; const previewImg = document.getElementById(`preview-${rowId}`); const val = this.value.trim();
                         if (val !== '') {
-                            previewImg.src = `images/${val}.png`;
-                            previewImg.onerror = function() {
-                                if (this.src.includes('.png')) this.src = `images/${val}.jpg`;
-                                else { this.onerror = null; this.src = `https://placehold.co/32x32/f1f5f9/94a3b8?text=N/A`; }
-                            };
+                            const poolHit = (window.poolSrc ? poolSrc(val) : null);
+                            if (poolHit) {
+                                previewImg.onerror = null; previewImg.src = poolHit;
+                            } else {
+                                previewImg.src = `images/${val}.png`;
+                                previewImg.onerror = function() {
+                                    if (this.src.includes('.png')) this.src = `images/${val}.jpg`;
+                                    else { this.onerror = null; this.src = `https://placehold.co/32x32/f1f5f9/94a3b8?text=N/A`; }
+                                };
+                            }
                             previewImg.classList.remove('hidden');
                         } else { previewImg.classList.add('hidden'); previewImg.src = ''; }
+                        if (window.markMissingImages) markMissingImages();
                     });
                 }
                 input.addEventListener('keydown', function(e) {
@@ -2044,11 +2082,15 @@
                 }, 30);
 
                 if (heroId) {
-                    avatar.src = `Hero/${heroId}.png`;
-                    avatar.onerror = function() {
-                        if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
-                        else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
-                    };
+                    const lbPoolHit = (window.poolSrc ? poolSrc(heroId) : null);
+                    if (lbPoolHit) { avatar.onerror = null; avatar.src = lbPoolHit; }
+                    else {
+                        avatar.src = `Hero/${heroId}.png`;
+                        avatar.onerror = function() {
+                            if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
+                            else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
+                        };
+                    }
                 }
 
                 if (winner === 'hero') {
@@ -2088,8 +2130,9 @@
                     const rankColor = index === 0 ? 'text-yellow-400 drop-shadow-[0_0_8px_yellow]' : index === 1 ? 'text-gray-300 drop-shadow-[0_0_5px_white]' : index === 2 ? 'text-orange-400 drop-shadow-[0_0_5px_orange]' : 'text-blue-300';
                     const rankIcon = index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
                     
-                    let imgSrc = `Hero/${row.avatarId}.png`;
-                    let fallbackSrc = `Hero/${row.avatarId}.jpg`;
+                    const rowPoolHit = (window.poolSrc ? poolSrc(row.avatarId) : null);
+                    let imgSrc = rowPoolHit || `Hero/${row.avatarId}.png`;
+                    let fallbackSrc = rowPoolHit || `Hero/${row.avatarId}.jpg`;
                     let finalFallback = `https://placehold.co/100x100/1E3A8A/F6C90E?text=${row.name.charAt(0).toUpperCase()}`;
 
                     const item = document.createElement('div');
@@ -2246,10 +2289,15 @@
                 wrapper.dataset.cardObject = JSON.stringify(cardData);
 
                 if (cardData.id) {
-                    cardImg.src = `images/${cardData.id}.png`;
-                    cardImg.onerror = function() {
-                        if (this.src.includes('.png')) this.src = `images/${cardData.id}.jpg`;
-                        else { this.onerror = null; this.src = `https://placehold.co/500x300/cbd5e1/475569?text=IMG+${cardData.id}`; }
+                    const cardPoolHit = (window.poolSrc ? poolSrc(cardData.id) : null);
+                    if (cardPoolHit) {
+                        cardImg.onerror = null; cardImg.src = cardPoolHit;
+                    } else {
+                        cardImg.src = `images/${cardData.id}.png`;
+                        cardImg.onerror = function() {
+                            if (this.src.includes('.png')) this.src = `images/${cardData.id}.jpg`;
+                            else { this.onerror = null; this.src = `https://placehold.co/500x300/cbd5e1/475569?text=IMG+${cardData.id}`; }
+                        }
                     }
                 } else { cardImg.src = `https://placehold.co/500x300/e2e8f0/94a3b8?text=Empty`; }
                 cardTxt.textContent = cardData.text || "";
@@ -2731,16 +2779,22 @@
                 const startHeroAvatar = document.getElementById('start-hero-avatar');
                 
                 if (heroId) {
-                    const fallbackLogic = function() {
-                        if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
-                        else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
-                    };
-                    mainHeroAvatar.src = `Hero/${heroId}.png`;
-                    mainHeroAvatar.onerror = fallbackLogic;
-                    
-                    if(startHeroAvatar) {
-                        startHeroAvatar.src = `Hero/${heroId}.png`;
-                        startHeroAvatar.onerror = fallbackLogic;
+                    const heroPoolHit = (window.poolSrc ? poolSrc(heroId) : null);
+                    if (heroPoolHit) {
+                        mainHeroAvatar.onerror = null; mainHeroAvatar.src = heroPoolHit;
+                        if (startHeroAvatar) { startHeroAvatar.onerror = null; startHeroAvatar.src = heroPoolHit; }
+                    } else {
+                        const fallbackLogic = function() {
+                            if (this.src.includes('.png')) this.src = `Hero/${heroId}.jpg`;
+                            else { this.onerror = null; this.src = 'https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO'; }
+                        };
+                        mainHeroAvatar.src = `Hero/${heroId}.png`;
+                        mainHeroAvatar.onerror = fallbackLogic;
+
+                        if(startHeroAvatar) {
+                            startHeroAvatar.src = `Hero/${heroId}.png`;
+                            startHeroAvatar.onerror = fallbackLogic;
+                        }
                     }
                 }
 
@@ -2752,7 +2806,10 @@
                 if (tenorUrlMatch) { bossThemeVal = tenorUrlMatch[1]; }
 
                 let bossHtmlContent = '';
-                if (bossThemeVal.match(/^\d+$/)) {
+                const bossPoolHit = (window.poolSrc ? poolSrc(bossThemeVal) : null);
+                if (bossPoolHit) {
+                    bossHtmlContent = `<img src="${bossPoolHit}" class="w-full h-full object-cover pointer-events-none bg-black" />`;
+                } else if (bossThemeVal.match(/^\d+$/)) {
                     bossHtmlContent = `<iframe src="https://tenor.com/embed/${bossThemeVal}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`;
                 } else {
                     bossHtmlContent = `<img src="${bossThemeVal}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null; this.src='https://placehold.co/400x400/1e293b/cbd5e1?text=LỖI+LINK+ẢNH';" />`;
@@ -2774,7 +2831,10 @@
                     const tenorUrlMatchBg = bgThemeVal.match(/tenor\.com\/view\/.*-(\d+)$/);
                     if (tenorUrlMatchBg) bgThemeVal = tenorUrlMatchBg[1]; 
 
-                    if (bgThemeVal.match(/^\d+$/)) {
+                    const bgPoolHit = (window.poolSrc ? poolSrc(bgThemeVal) : null);
+                    if (bgPoolHit) {
+                        bgContainer.innerHTML = `<img src="${bgPoolHit}" class="w-full h-full object-cover pointer-events-none" />`;
+                    } else if (bgThemeVal.match(/^\d+$/)) {
                         bgContainer.innerHTML = `<iframe src="https://tenor.com/embed/${bgThemeVal}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none w-full h-full scale-[1.5] object-cover" allowtransparency="true"></iframe>`;
                     } else {
                         bgContainer.innerHTML = `<img src="${bgThemeVal}" class="w-full h-full object-cover pointer-events-none" onerror="this.onerror=null; this.style.display='none';" />`;
@@ -2846,6 +2906,8 @@
                 heroAvatarInput.addEventListener('input', function() {
                     const val = this.value.trim();
                     if(val) {
+                        const prevPoolHit = (window.poolSrc ? poolSrc(val) : null);
+                        if (prevPoolHit) { heroAvatarPreview.onerror = null; heroAvatarPreview.src = prevPoolHit; return; }
                         heroAvatarPreview.src = `Hero/${val}.png`;
                         heroAvatarPreview.onerror = function() {
                             if (this.src.includes('.png')) this.src = `Hero/${val}.jpg`;
@@ -2980,6 +3042,438 @@
                 }
             }, 50);
         });
+    </script>
+    <script>
+        /* ============================================================
+           BOSS THẢ JUNK FOOD — Gói nâng cấp (em thêm, không đụng logic game):
+           1) Kho ảnh upload IndexedDB (chịu được 100+ ảnh, không hết chỗ)
+           2) Nén ảnh WebP/PNG/JPEG + kiểm tra nền trong suốt
+           3) Sao lưu / Khôi phục 1 file .json (bảng + cài đặt + xếp hạng + kho ảnh)
+           4) Bố cục auto-fit: màn hình nào cũng vừa khung, không tràn
+           ============================================================ */
+        (function() {
+            'use strict';
+
+            var APP_TAG = 'boss-tha-junk-food';
+            var LS_GRID = 'bossGameGridData';
+            var LS_SETTINGS = 'bossGameSettingsData';
+            var LS_LEADERBOARD = 'bossGameLeaderboard';
+            var LS_POOL_FALLBACK = 'bossGameImagesPool';
+            var DB_NAME = 'BossJunkFoodDB';
+            var STORE = 'kv';
+            var POOL_KEY = 'imagesPool';
+            var MAX_SIDE = 400;
+            var QUALITY = 0.85;
+
+            var imagesPool = {};           // { id: dataURL }
+            window.imagesPool = imagesPool;
+
+            /* ---------- SafeStore: bọc try/catch quanh localStorage ---------- */
+            var SafeStore = {
+                get: function(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: function(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+                remove: function(k) { try { localStorage.removeItem(k); } catch (e) {} }
+            };
+
+            /* ---------- IndexedDB (kho ảnh to) ---------- */
+            function idbOpen() {
+                return new Promise(function(res, rej) {
+                    if (!window.indexedDB) { rej(new Error('IndexedDB không khả dụng')); return; }
+                    var req = indexedDB.open(DB_NAME, 1);
+                    req.onupgradeneeded = function() {
+                        var db = req.result;
+                        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+                    };
+                    req.onsuccess = function() { res(req.result); };
+                    req.onerror = function() { rej(req.error); };
+                });
+            }
+            function idbSet(key, val) {
+                return idbOpen().then(function(db) {
+                    return new Promise(function(res, rej) {
+                        var tx = db.transaction(STORE, 'readwrite');
+                        tx.objectStore(STORE).put(val, key);
+                        tx.oncomplete = function() { res(true); };
+                        tx.onerror = function() { rej(tx.error); };
+                        tx.onabort = function() { rej(tx.error); };
+                    });
+                });
+            }
+            function idbGet(key) {
+                return idbOpen().then(function(db) {
+                    return new Promise(function(res, rej) {
+                        var tx = db.transaction(STORE, 'readonly');
+                        var rq = tx.objectStore(STORE).get(key);
+                        rq.onsuccess = function() { res(rq.result); };
+                        rq.onerror = function() { rej(rq.error); };
+                    });
+                });
+            }
+
+            /* ---------- Nén ảnh khi nhận ---------- */
+            function fileToDataURL(file) {
+                return new Promise(function(res, rej) {
+                    var fr = new FileReader();
+                    fr.onload = function() { res(fr.result); };
+                    fr.onerror = function() { rej(fr.error); };
+                    fr.readAsDataURL(file);
+                });
+            }
+            function compressImage(file) {
+                return fileToDataURL(file).then(function(origDataURL) {
+                    return new Promise(function(res) {
+                        var img = new Image();
+                        img.onload = function() {
+                            try {
+                                var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+                                var scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+                                var c = document.createElement('canvas');
+                                c.width = Math.max(1, Math.round(w * scale));
+                                c.height = Math.max(1, Math.round(h * scale));
+                                var ctx = c.getContext('2d');
+                                ctx.drawImage(img, 0, 0, c.width, c.height);
+
+                                // Kiểm tra alpha: ảnh nào có trong suốt thì KHÔNG được ép JPEG/WebP
+                                var hasAlpha = false;
+                                try {
+                                    var d = ctx.getImageData(0, 0, c.width, c.height).data;
+                                    for (var i = 3; i < d.length; i += 68) { if (d[i] < 250) { hasAlpha = true; break; } }
+                                } catch (e) { hasAlpha = true; }
+
+                                var out = null;
+                                if (hasAlpha) {
+                                    out = c.toDataURL('image/png');
+                                } else {
+                                    var webp = c.toDataURL('image/webp', QUALITY);
+                                    out = (webp.indexOf('data:image/webp') === 0) ? webp : c.toDataURL('image/jpeg', QUALITY);
+                                }
+                                // Nén mà to hơn bản gốc → giữ bản gốc, không bao giờ mất ảnh
+                                if (out.length >= origDataURL.length) out = origDataURL;
+                                res(out);
+                            } catch (e) { res(origDataURL); }
+                        };
+                        img.onerror = function() { res(null); };
+                        img.src = origDataURL;
+                    });
+                });
+            }
+            function cleanIdFromName(name) {
+                return String(name || '').replace(/\.[a-z0-9]+$/i, '').trim();
+            }
+
+            /* ---------- Truy vấn ảnh theo ID (dùng ở mọi chỗ game cần ảnh) ---------- */
+            function poolSrc(id) {
+                var k = String(id == null ? '' : id).trim();
+                if (!k) return null;
+                return imagesPool[k] || imagesPool[String(parseInt(k, 10))] || null;
+            }
+            window.poolSrc = poolSrc;
+            window.hasPoolImage = function(id) { return !!poolSrc(id); };
+
+            /* ---------- Ghi / đọc kho ảnh ---------- */
+            function saveImagesPool() {
+                var snapshot = JSON.parse(JSON.stringify(imagesPool));
+                return idbSet(POOL_KEY, snapshot).catch(function() {
+                    // Trượt IndexedDB → localStorage (chỗhết chỗ thì báo)
+                    var ok = SafeStore.set(LS_POOL_FALLBACK, JSON.stringify(snapshot));
+                    if (!ok) {
+                        bjfAlert('⚠️ Máy này chặn bộ nhớ trình duyệt nên không lưu được ảnh. Thử thoát chế độ ẩn danh / mở lại bình thường nhé.', 'alert');
+                    }
+                    return false;
+                });
+            }
+            function loadImagesPool() {
+                return idbGet(POOL_KEY).then(function(stored) {
+                    var fromDb = stored || {};
+                    var fromLs = null;
+                    try { fromLs = JSON.parse(SafeStore.get(LS_POOL_FALLBACK) || 'null'); } catch (e) {}
+                    if (fromLs && typeof fromLs === 'object') {
+                        // GỘP, không overwrite
+                        Object.keys(fromLs).forEach(function(k) { if (!fromDb[k]) fromDb[k] = fromLs[k]; });
+                    }
+                    Object.keys(fromDb).forEach(function(k) { imagesPool[k] = fromDb[k]; });
+                    return imagesPool;
+                }).catch(function() {
+                    try { var f = JSON.parse(SafeStore.get(LS_POOL_FALLBACK) || '{}'); Object.keys(f).forEach(function(k) { imagesPool[k] = f[k]; }); } catch (e) {}
+                    return imagesPool;
+                });
+            }
+
+            /* ---------- Dialog dùng lại khung thông báo sẵn có của game ---------- */
+            function bjfAlert(message, type, onConfirm) {
+                var overlay = document.getElementById('custom-alert-overlay');
+                var title = document.getElementById('custom-alert-title');
+                var msg = document.getElementById('custom-alert-msg');
+                var icon = document.getElementById('custom-alert-icon');
+                var btns = document.getElementById('custom-alert-buttons');
+                if (!overlay) { window.alert(message); return; }
+                title.textContent = (type === 'confirm') ? 'Xác nhận' : 'Thông Báo';
+                icon.textContent = (type === 'confirm') ? '🤔' : '⚠️';
+                msg.textContent = message;
+                btns.innerHTML = '';
+                var close = function() { overlay.classList.add('hidden'); };
+                if (type === 'confirm') {
+                    var yes = document.createElement('button');
+                    yes.className = 'bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold';
+                    yes.textContent = '✔️ Đồng ý';
+                    yes.onclick = function() { close(); if (onConfirm) onConfirm(); };
+                    var no = document.createElement('button');
+                    no.className = 'bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-bold';
+                    no.textContent = '✖️ Hủy';
+                    no.onclick = close;
+                    btns.appendChild(yes); btns.appendChild(no);
+                } else {
+                    var ok = document.createElement('button');
+                    ok.className = 'bg-edNavy hover:bg-edNavyLight text-white px-8 py-2 rounded-lg font-bold';
+                    ok.textContent = 'OK';
+                    ok.onclick = close;
+                    btns.appendChild(ok);
+                }
+                overlay.classList.remove('hidden');
+            }
+            window.bjfAlert = bjfAlert;
+
+            /* ---------- Cờ ô ID thiếu ảnh ---------- */
+            function markMissingImages() {
+                var cells = document.querySelectorAll('.excel-input[data-col="id"]');
+                cells.forEach(function(inp) {
+                    var cell = inp.closest('.excel-cell');
+                    if (!cell) return;
+                    var v = inp.value.trim();
+                    if (v && !poolSrc(v)) cell.classList.add('id-missing');
+                    else cell.classList.remove('id-missing');
+                });
+            }
+            window.markMissingImages = markMissingImages;
+
+            function refreshGridPreviews() {
+                document.querySelectorAll('.excel-input[data-col="id"]').forEach(function(inp) {
+                    if (inp.value.trim()) inp.dispatchEvent(new Event('input'));
+                });
+                markMissingImages();
+            }
+            window.refreshGridPreviews = refreshGridPreviews;
+
+            /* ---------- Vẽ kho ảnh ---------- */
+            function updatePoolStats() {
+                var ids = Object.keys(imagesPool);
+                var count = ids.length;
+                var bytes = 0;
+                ids.forEach(function(k) { bytes += (imagesPool[k] || '').length; });
+                var mb = bytes / 1048576;
+                var cEl = document.getElementById('pool-count');
+                var sEl = document.getElementById('pool-size');
+                if (cEl) cEl.textContent = count + ' ảnh';
+                if (sEl) sEl.textContent = (mb >= 1 ? mb.toFixed(2) + ' MB' : (bytes / 1024).toFixed(0) + ' KB');
+            }
+
+            function renderPool() {
+                var grid = document.getElementById('pool-grid');
+                if (!grid) return;
+                grid.innerHTML = '';
+                var ids = Object.keys(imagesPool).sort(function(a, b) {
+                    var na = parseFloat(a), nb = parseFloat(b);
+                    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+                    return String(a).localeCompare(String(b));
+                });
+                if (!ids.length) {
+                    grid.innerHTML = '<div class="text-xs text-gray-400 italic">Chưa có ảnh nào trong kho.</div>';
+                    updatePoolStats();
+                    return;
+                }
+                ids.forEach(function(id) {
+                    var wrap = document.createElement('label');
+                    wrap.className = 'pool-thumb relative w-[64px] shrink-0 cursor-pointer';
+                    wrap.innerHTML =
+                        '<input type="checkbox" class="pool-check absolute top-1 left-1 z-10 w-4 h-4 cursor-pointer" data-id="' + id + '">' +
+                        '<img src="' + imagesPool[id] + '" class="w-16 h-16 object-contain bg-gray-100 border-2 border-amber-300 rounded-lg shadow-sm">' +
+                        '<div class="text-[10px] text-center font-bold text-edNavy truncate" title="' + id + '">' + id + '</div>';
+                    grid.appendChild(wrap);
+                });
+                updatePoolStats();
+            }
+            window.renderPool = renderPool;
+            window.bjfIngestFiles = ingestFiles;
+            window.bjfCompress = compressImage;
+
+            /* ---------- Thêm ảnh ---------- */
+            function addImageErrors(errs) {
+                var box = document.getElementById('pool-errors');
+                if (!box) return;
+                if (!errs.length) { box.textContent = ''; return; }
+                box.innerHTML = '❌ Không thêm được: ' + errs.join(' ; ');
+            }
+
+            function ingestFiles(fileList) {
+                var files = Array.prototype.slice.call(fileList || []);
+                var errs = [];
+                var pending = [];
+                files.forEach(function(f) {
+                    var isImg = (f.type && f.type.indexOf('image/') === 0) || /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(f.name);
+                    if (!isImg) { errs.push(f.name + ' (không phải ảnh)'); return; }
+                    if (/heic|heif/i.test(f.type) || /\.hei[cf]$/i.test(f.name)) { errs.push(f.name + ' (định dạng HEIC của iPhone — hãy chuyển sang JPG trước)'); return; }
+                    pending.push(f);
+                });
+                addImageErrors(errs);
+                if (!pending.length) return Promise.resolve(0);
+
+                var jobs = pending.map(function(f) {
+                    return compressImage(f).then(function(dataURL) {
+                        if (!dataURL) { errs.push(f.name + ' (không đọc được)'); return null; }
+                        var id = cleanIdFromName(f.name);
+                        if (!id) id = 'img' + Date.now();
+                        imagesPool[id] = dataURL;
+                        return id;
+                    });
+                });
+                return Promise.all(jobs).then(function(ids) {
+                    var added = ids.filter(Boolean).length;
+                    addImageErrors(errs);
+                    return saveImagesPool().then(function() {
+                        renderPool();
+                        refreshGridPreviews();
+                        return added;
+                    });
+                });
+            }
+
+            /* ---------- Sao lưu / Khôi phục ---------- */
+            function backupAll() {
+                var payload = {
+                    app: APP_TAG,
+                    version: 1,
+                    created: new Date().toISOString(),
+                    localStorage: {},
+                    imagesPool: JSON.parse(JSON.stringify(imagesPool))
+                };
+                [LS_GRID, LS_SETTINGS, LS_LEADERBOARD].forEach(function(k) {
+                    var v = SafeStore.get(k);
+                    if (v) { try { payload.localStorage[k] = JSON.parse(v); } catch (e) { payload.localStorage[k] = v; } }
+                });
+                var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                var a = document.createElement('a');
+                var d = new Date();
+                var stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'boss-tha-junk-food-' + stamp + '.json';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+            }
+
+            function restoreAll(file) {
+                var fr = new FileReader();
+                fr.onload = function() {
+                    var data = null;
+                    try { data = JSON.parse(fr.result); } catch (e) {}
+                    if (!data || data.app !== APP_TAG) {
+                        bjfAlert('❌ File không đúng của game này. Dữ liệu hiện tại được GIỮ NGUYÊN, không bị thay.', 'alert');
+                        return;
+                    }
+                    var nImages = Object.keys(data.imagesPool || {}).length;
+                    var nRows = (data.localStorage && data.localStorage[LS_GRID] && data.localStorage[LS_GRID].length) || 0;
+                    bjfAlert('Khôi phục file này sẽ THAY bảng dữ liệu (' + nRows + ' dòng), cài đặt, bảng xếp hạng và kho ảnh (' + nImages + ' ảnh) bằng nội dung trong file. Anh có muốn tiếp tục không?', 'confirm', function() {
+                        var ls = data.localStorage || {};
+                        [LS_GRID, LS_SETTINGS, LS_LEADERBOARD].forEach(function(k) {
+                            if (ls[k] !== undefined) SafeStore.set(k, JSON.stringify(ls[k]));
+                        });
+                        var pool = data.imagesPool || {};
+                        imagesPool = {};
+                        window.imagesPool = imagesPool;
+                        Object.keys(pool).forEach(function(k) { imagesPool[k] = pool[k]; });
+                        saveImagesPool().then(function() {
+                            bjfAlert('✅ Khôi phục xong! Trang sẽ tải lại để áp dụng.', 'alert');
+                            setTimeout(function() { location.reload(); }, 1200);
+                        });
+                    });
+                };
+                fr.readAsText(file);
+            }
+
+            /* ---------- Auto-fit màn hình ---------- */
+            var DESIGN_W = 1920, DESIGN_H = 1080;
+            function fitStage() {
+                var st = document.getElementById('stage');
+                if (!st) return;
+                var s = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
+                st.style.transform = 'scale(' + s + ')';
+            }
+            window.fitStage = fitStage;
+            window.addEventListener('resize', fitStage);
+
+            /* ---------- Cắm sự kiện khi DOM sẵn sàng ---------- */
+            document.addEventListener('DOMContentLoaded', function() {
+                fitStage();
+
+                var fileInput = document.getElementById('pool-file');
+                var dropzone = document.getElementById('pool-dropzone');
+
+                var btnUpload = document.getElementById('btn-pool-upload');
+                if (btnUpload && fileInput) btnUpload.addEventListener('click', function() { fileInput.click(); });
+                if (fileInput) fileInput.addEventListener('change', function() {
+                    ingestFiles(this.files).then(function(n) {
+                        if (n) bjfAlert('✅ Đã thêm ' + n + ' ảnh vào kho!', 'alert');
+                    });
+                    this.value = '';
+                });
+
+                if (dropzone) {
+                    ['dragenter', 'dragover'].forEach(function(ev) {
+                        dropzone.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); });
+                    });
+                    ['dragleave', 'drop'].forEach(function(ev) {
+                        dropzone.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); });
+                    });
+                    dropzone.addEventListener('drop', function(e) {
+                        if (e.dataTransfer && e.dataTransfer.files) {
+                            ingestFiles(e.dataTransfer.files).then(function(n) { if (n) bjfAlert('✅ Đã thêm ' + n + ' ảnh vào kho!', 'alert'); });
+                        }
+                    });
+                }
+
+                var btnDel = document.getElementById('btn-pool-delselected');
+                if (btnDel) btnDel.addEventListener('click', function() {
+                    var checked = Array.prototype.slice.call(document.querySelectorAll('.pool-check:checked')).map(function(c) { return c.dataset.id; });
+                    if (!checked.length) { bjfAlert('Hãy tick chọn ô vuông trước ảnh muốn xóa nhé.', 'alert'); return; }
+                    bjfAlert('Xóa ' + checked.length + ' ảnh đã chọn khỏi kho?', 'confirm', function() {
+                        checked.forEach(function(id) { delete imagesPool[id]; });
+                        saveImagesPool().then(function() { renderPool(); refreshGridPreviews(); });
+                    });
+                });
+
+                var btnClean = document.getElementById('btn-pool-cleanid');
+                if (btnClean) btnClean.addEventListener('click', function() {
+                    var fixed = 0;
+                    document.querySelectorAll('.excel-input[data-col="id"]').forEach(function(inp) {
+                        var raw = inp.value;
+                        var cleaned = cleanIdFromName(raw).replace(/\s+/g, '');
+                        if (cleaned !== raw) { inp.value = cleaned; fixed++; inp.dispatchEvent(new Event('input')); }
+                    });
+                    markMissingImages();
+                    bjfAlert(fixed ? ('✅ Đã dọn sạch ' + fixed + ' ô ID (bỏ khoảng trắng và đuôi file).') : '✅ Mọi ô ID đã sạch rồi.', 'alert');
+                });
+
+                var btnBackup = document.getElementById('btn-backup');
+                if (btnBackup) btnBackup.addEventListener('click', function() {
+                    backupAll();
+                    bjfAlert('💾 Đã tải file sao lưu. GIỮ FILE NÀY (đưa vào Google Drive) để chuyển máy hoặc khi mất dữ liệu nhé!', 'alert');
+                });
+
+                var restoreInput = document.getElementById('restore-file');
+                if (restoreInput) restoreInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) restoreAll(this.files[0]);
+                    this.value = '';
+                });
+
+                renderPool();
+
+                // Kho ảnh load async → khi xong thì vẽ lại ô ID + preview
+                loadImagesPool().then(function() {
+                    renderPool();
+                    refreshGridPreviews();
+                });
+            });
+        })();
     </script>
 </body>
 </html>
