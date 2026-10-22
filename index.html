@@ -5,22 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boss Thả Junk Food - Boss Battle</title>
     <link rel="icon" type="image/png" href="logo.png?v=3">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
-                    colors: { edKem: '#FFFBF0', edVang: '#F6C90E', edVangHover: '#DDAA00', edNavy: '#1E3A8A', edNavyLight: '#2563EB', edXanhRing: '#3B82F6' },
-                    boxShadow: { 'ed': '0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06)', 'ed-lg': '0 10px 15px -3px rgba(30, 58, 138, 0.1), 0 4px 6px -2px rgba(30, 58, 138, 0.05)' }
-                }
-            }
-        }
-    </script>
     <style>
         body { background-color: #f3f4f6; } 
-        #settings-modal { transition: opacity 0.2s ease-in-out; }
+        #settings-modal { transition: opacity 0.2s ease-in-out; overflow-y: auto; }
+        /* Hộp cài đặt cao hơn màn hình ngắn -> cuộn được, không bị cắt trên/dưới */
+        #settings-modal #modal-content { margin: auto; flex-shrink: 0; }
         .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
         .excel-table th { background-color: #1E3A8A; color: white; border: 1px solid #cbd5e1; padding: 8px; font-weight: 700; position: sticky; top: 0; z-index: 10; }
         .excel-table td { border: 1px solid #cbd5e1; padding: 0; position: relative; height: 40px; background: white; }
@@ -171,19 +161,22 @@
             animation: orbit-counter-spin 6s linear infinite;
         }
         /* --- Gói nâng cấp: auto-fit màn hình + kho ảnh --- */
-        #stage { width: 1920px; height: 1080px; position: relative; transform-origin: center center; }
+        #stage { width: 100%; height: 100%; position: relative; transform-origin: center center; flex-shrink: 0; }
+        /* Tối ưu hiệu năng: các hiệu ứng chạy liên tục được tách thành lớp riêng để giảm repaint */
+        .animate-boss, .animate-aura, #start-screen-overlay > div > div { will-change: transform; }
         .id-missing { outline: 3px dashed #ef4444 !important; outline-offset: -3px; animation: id-blink 1s ease-in-out infinite; }
         @keyframes id-blink { 0%, 100% { background-color: rgba(239,68,68,0.10); } 50% { background-color: rgba(239,68,68,0.32); } }
         #pool-dropzone.dragover { border-color: #f59e0b; background: #fef3c7; transform: scale(1.01); }
         .pool-thumb:hover img { border-color: #f59e0b; }
     </style>
+    <link rel="stylesheet" href="tailwind.min.css?v=1">
 </head>
 <body class="font-sans h-screen w-screen overflow-hidden flex items-center justify-center relative bg-gray-900">
     <div id="stage">
 
     <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-[9999]"></div>
 
-    <div id="start-screen-overlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-[65] flex flex-col items-center justify-center transition-opacity duration-500">
+    <div id="start-screen-overlay" class="absolute inset-0 bg-black/90 z-[65] flex flex-col items-center justify-center transition-opacity duration-500">
         
         <div class="flex items-center justify-center gap-12 mb-12 w-full px-10">
             <!-- Hero Side -->
@@ -213,15 +206,15 @@
 
     <div id="game-container" class="absolute inset-0 z-0 flex w-full h-full bg-gradient-to-br from-[#1a0b2e] via-[#2d1b4e] to-[#0f172a] overflow-hidden">
         
-        <div id="pause-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-sm z-[45] flex flex-col items-center justify-center hidden">
+        <div id="pause-overlay" class="absolute inset-0 bg-black/70 z-[45] flex flex-col items-center justify-center hidden">
             <div class="text-white font-black text-6xl tracking-widest text-shadow-lg drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] animate-pulse">
                 ⏸ PAUSED
             </div>
             <p class="text-yellow-300 text-xl font-bold mt-4 tracking-wider">Press Play to continue</p>
         </div>
 
-        <div id="leaderboard-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-lg z-[9990] hidden flex items-center justify-center opacity-0 transition-opacity duration-1000">
-            <div class="bg-gradient-to-b from-blue-900 to-indigo-950 w-[700px] max-h-[972px] rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.6)] border-4 border-yellow-400 p-8 text-center relative flex flex-col transform scale-90 transition-transform duration-700" id="leaderboard-box">
+        <div id="leaderboard-overlay" class="absolute inset-0 bg-black/90 z-[9990] hidden flex items-center justify-center opacity-0 transition-opacity duration-1000">
+            <div class="bg-gradient-to-b from-blue-900 to-indigo-950 w-[700px] max-h-[90vh] rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.6)] border-4 border-yellow-400 p-8 text-center relative flex flex-col transform scale-90 transition-transform duration-700" id="leaderboard-box">
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-screen pointer-events-none z-0 rounded-3xl"></div>
                 
                 <div id="lb-input-state" class="relative z-10 flex flex-col items-center w-full">
@@ -298,7 +291,7 @@
             <div id="dynamic-bg-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-[-2] overflow-hidden" style="opacity: 0.4;"></div>
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-screen pointer-events-none z-[-1]"></div>
 
-            <div class="absolute top-4 right-4 bg-black/40 p-3 rounded-xl border border-gray-700/50 backdrop-blur-md z-20 flex flex-col items-center gap-2">
+            <div class="absolute top-4 right-4 bg-black/65 p-3 rounded-xl border border-gray-700/50 z-20 flex flex-col items-center gap-2">
                 <div id="boss-skills-container" class="grid grid-cols-4 gap-2 w-[220px]"></div>
                 <div id="enrage-timer-display" class="text-orange-400 font-black text-sm tracking-widest bg-black/60 px-3 py-1 rounded-full border border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.5)] w-full text-center">
                     ENRAGE IN: 03:00
@@ -424,7 +417,7 @@
             <div class="w-4 h-24 bg-white/30 rounded-full blur-[2px]"></div>
         </div>
 
-        <div class="w-1/3 h-full bg-black/30 backdrop-blur-md p-4 flex flex-col justify-between gap-4 z-40 relative">
+        <div class="w-1/3 h-full bg-black/60 p-4 flex flex-col justify-between gap-4 z-40 relative">
             
             <div id="thunder-card-lock" class="absolute inset-0 bg-yellow-400/20 backdrop-blur-[2px] z-[65] hidden flex flex-col items-center justify-center rounded-2xl border-4 border-yellow-400 border-dashed mx-2 my-2">
                 <span class="text-5xl font-black text-white animate-pulse drop-shadow-[0_0_20px_red] tracking-widest bg-red-600/80 px-6 py-2 rounded-xl border-2 border-white shadow-2xl text-center">⚡ PARALYZED ⚡</span>
@@ -508,7 +501,7 @@
         </svg>
     </button>
 
-    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center opacity-0 pointer-events-none">
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 z-[90] flex items-center justify-center opacity-0 pointer-events-none">
         <div class="bg-edKem w-11/12 max-w-[1400px] h-[1026px] rounded-2xl shadow-2xl flex flex-col overflow-hidden border-4 border-edNavy transform transition-transform scale-95 duration-200" id="modal-content">
             
             <div class="bg-edNavy text-white px-6 py-4 flex justify-between items-center shrink-0">
@@ -852,7 +845,7 @@
         </div>
     </div>
     
-    <div id="custom-alert-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[999999] hidden flex items-center justify-center">
+    <div id="custom-alert-overlay" class="fixed inset-0 bg-black/85 z-[999999] hidden flex items-center justify-center">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-edNavy transform transition-all scale-95" id="custom-alert-box">
             <div class="text-5xl mb-4" id="custom-alert-icon">⚠️</div>
             <h3 class="text-2xl font-black text-edNavy mb-2" id="custom-alert-title">Thông Báo</h3>
@@ -3377,16 +3370,74 @@
                 fr.readAsText(file);
             }
 
-            /* ---------- Auto-fit màn hình ---------- */
-            var DESIGN_W = 1920, DESIGN_H = 1080;
+            /* ---------- Tự vừa màn hình ----------
+               Khung game luôn phủ kín cửa sổ -> không còn nền xám ở 2 bên.
+               Chỉ khi chiều cao cửa sổ không chứa nổi nội dung thì mới nới khung rộng ra
+               rồi thu nhỏ vừa vặn -> không bao giờ bị cắt mất phần dưới của game. */
+            function stageIsShown(e) {
+                while (e && e !== document.documentElement) {
+                    var c = getComputedStyle(e);
+                    if (c.display === 'none' || c.visibility === 'hidden' || parseFloat(c.opacity) < 0.05) return false;
+                    if (c.position === 'fixed') return false; /* lớp phủ toàn màn hình, không thuộc khung game */
+                    e = e.parentElement;
+                }
+                return true;
+            }
+            function stageContentBottom(root) {
+                var max = 0;
+                var els = root.querySelectorAll('*');
+                for (var i = 0; i < els.length; i++) {
+                    var e = els[i];
+                    if (!stageIsShown(e)) continue;
+                    var cs = getComputedStyle(e);
+                    var r = e.getBoundingClientRect();
+                    if (r.width <= 0 || r.height <= 0) continue;
+                    /* phần tử tuyệt đối không nền/chữ thì chỉ là khung trống -> bỏ (tránh tính thừa lề dưới) */
+                    if (cs.position === 'absolute') {
+                        var ownText = false;
+                        for (var k = 0; k < e.childNodes.length; k++) {
+                            var n = e.childNodes[k];
+                            if (n.nodeType === 3 && n.nodeValue && n.nodeValue.trim()) { ownText = true; break; }
+                        }
+                        var hasBg = (cs.backgroundColor !== 'rgba(0, 0, 0, 0)') || (cs.backgroundImage !== 'none');
+                        if (!ownText && !hasBg) continue;
+                    }
+                    if (r.bottom > max) max = r.bottom;
+                }
+                return max;
+            }
             function fitStage() {
                 var st = document.getElementById('stage');
                 if (!st) return;
-                var s = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
-                st.style.transform = 'scale(' + s + ')';
+                var W = window.innerWidth, H = window.innerHeight;
+                var TOL = 10; /* Design có sẵn vài px nhô ra dưới, coi như bình thường */
+                st.style.transform = '';
+                st.style.transformOrigin = '';
+                st.style.width = '';
+                st.style.height = '';
+                var need = stageContentBottom(st);
+                if (need <= H + TOL) return;      /* Đủ chỗ: khung phủ kín cửa sổ, không thu nhỏ */
+                var L = Math.max(H, Math.ceil(need));
+                for (var pass = 0; pass < 5; pass++) {
+                    var s = H / L;
+                    st.style.width = (W / s) + 'px';
+                    st.style.height = L + 'px';
+                    st.style.transformOrigin = 'center center';
+                    st.style.transform = 'scale(' + s + ')';
+                    var v = stageContentBottom(st);   /* đo lại khi đã thu nhỏ */
+                    if (v <= H + TOL) break;
+                    L += Math.ceil((v - H) * L / H) + 4;
+                }
             }
             window.fitStage = fitStage;
-            window.addEventListener('resize', fitStage);
+            var fitPending = false;
+            window.addEventListener('resize', function() {
+                if (fitPending) return;
+                fitPending = true;
+                requestAnimationFrame(function() { fitPending = false; fitStage(); });
+            });
+            window.addEventListener('load', fitStage);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { fitStage(); });
 
             /* ---------- Cắm sự kiện khi DOM sẵn sàng ---------- */
             document.addEventListener('DOMContentLoaded', function() {
@@ -3579,7 +3630,7 @@
                 if (!pickerEl) {
                     pickerEl = document.createElement('div');
                     pickerEl.id = 'pool-picker-overlay';
-                    pickerEl.className = 'fixed inset-0 bg-black/70 backdrop-blur-md z-[999998] hidden items-center justify-center';
+                    pickerEl.className = 'fixed inset-0 bg-black/85 z-[999998] hidden items-center justify-center';
                     pickerEl.innerHTML =
                         '<div class="bg-edKem rounded-2xl border-4 border-edNavy shadow-2xl w-[860px] max-w-[92vw] max-h-[86vh] flex flex-col overflow-hidden">' +
                         '  <div class="bg-edNavy text-white px-5 py-3 flex justify-between items-center">' +
