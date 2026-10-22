@@ -3430,12 +3430,15 @@
                 }
             }
             window.fitStage = fitStage;
-            var fitPending = false;
+            var fitTimer = null, fitTimer2 = null;
             window.addEventListener('resize', function() {
-                if (fitPending) return;
-                fitPending = true;
-                requestAnimationFrame(function() { fitPending = false; fitStage(); });
+                /* chay ngay sau đó chạy lại lần nữa cho chắc (tránh bỏ sót khi cửa sổ đổi nhanh) */
+                if (fitTimer) clearTimeout(fitTimer);
+                fitTimer = setTimeout(function() { fitTimer = null; fitStage(); }, 60);
+                if (fitTimer2) clearTimeout(fitTimer2);
+                fitTimer2 = setTimeout(function() { fitTimer2 = null; fitStage(); }, 500);
             });
+            document.addEventListener('visibilitychange', function() { if (!document.hidden) fitStage(); });
             window.addEventListener('load', fitStage);
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { fitStage(); });
 
