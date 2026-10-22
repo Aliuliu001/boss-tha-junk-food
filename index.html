@@ -635,21 +635,17 @@
                                     <td class="py-4 px-6 font-bold text-gray-700">🎭 Ngoại Hình</td>
                                     <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20 align-top">
                                         <div class="flex items-center gap-3 mb-1">
-                                            <input type="text" id="hero-avatar-id" data-save="hero_avatar_id" value="1" placeholder="ID hoặc dán link ảnh" class="w-56 p-2 border border-blue-300 rounded font-bold focus:ring-2 focus:ring-blue-500 outline-none text-center">
+                                            <input type="text" id="hero-avatar-id" data-save="hero_avatar_id" value="1" placeholder="Dán link ảnh HOẶC SỐ ID trong kho" class="w-56 p-2 border border-blue-300 rounded font-bold focus:ring-2 focus:ring-blue-500 outline-none text-center">
                                             <img id="hero-avatar-preview" src="https://placehold.co/40x40/e2e8f0/64748b?text=1" class="w-10 h-10 rounded-full border-2 border-blue-400 object-cover shadow-sm bg-white">
                                         </div>
                                         <span class="text-xs text-gray-500 italic">Dán <b>link ảnh bất kỳ</b> (Google/Drive/Tenor) HOẶC gõ <b>SỐ ID</b> có trong 📦 Kho ảnh. Bấm 📷 để chụp/ngambil ảnh ngay.</span>
                                     </td>
                                     <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20 align-top">
-                                        <div class="flex items-start gap-2 mb-2">
-                                            <input type="text" id="boss-theme-id" data-save="boss_theme_id" value="12582594" class="w-full p-2 border border-red-300 rounded font-bold text-center focus:ring-2 focus:ring-red-500 outline-none" placeholder="Tenor Link/ID hoặc Link Ảnh">
+                                        <div class="flex items-center gap-3 mb-1">
+                                            <input type="text" id="boss-theme-id" data-save="boss_theme_id" value="12582594" placeholder="Dán link ảnh HOẶC SỐ ID trong kho" class="w-56 p-2 border border-red-300 rounded font-bold focus:ring-2 focus:ring-red-500 outline-none text-center">
+                                            <img id="boss-avatar-preview" src="https://placehold.co/40x40/fecaca/991b1b?text=B" class="w-10 h-10 rounded-full border-2 border-red-400 object-cover shadow-sm bg-white">
                                         </div>
-                                        <div class="text-[11px] text-gray-600 bg-white p-2 rounded border border-red-200 shadow-inner leading-relaxed">
-                                            <strong class="text-red-700 block mb-1">📌 3 cách đổi hình Boss (chọn 1):</strong>
-                                            - <strong>Cách 1 (Link ảnh bất kỳ - Khuyên dùng):</strong> Chuột phải vào ảnh/GIF trên Google -> <kbd class="bg-gray-100 px-1 border rounded">Sao chép địa chỉ hình ảnh</kbd> rồi dán vào ô trên.<br>
-                                            - <strong>Cách 2 (ID Tenor):</strong> Copy dãy số cuối link Tenor.<br>
-                                            - <strong>Cách 3 (📷 ngay tại chỗ):</strong> Bấm nút 📷 bên dưới để chụp/chọn ảnh trong máy -> lưu vào 📦 Kho ảnh.
-                                        </div>
+                                        <span class="text-xs text-gray-500 italic">Dán <b>link ảnh bất kỳ</b> (Google/Drive/Tenor) HOẶC gõ <b>SỐ ID</b> có trong 📦 Kho ảnh. Bấm 📷 để chụp/ngambil ảnh ngay.</span>
                                     </td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 transition">
@@ -1196,10 +1192,10 @@
                 fbSystem.style.transform = 'translate(-50%, -50%) scale(0.1)';
                 
                 const core = document.createElement('div');
-                core.className = 'absolute w-12 h-12 bg-white rounded-full shadow-[0_0_40px_rgba(255,255,255,1)] flex items-center justify-center transition-all duration-1000 z-10';
+                core.className = 'absolute w-12 h-12 bg-white rounded-full shadow-[0_0_40px_rgba(255,255,255,1)] flex items-center justify-center transition-all duration-700 z-10';
                 
                 const aura = document.createElement('div');
-                aura.className = 'absolute w-full h-full border-[8px] border-yellow-300 rounded-full border-dashed animate-[spin_3s_linear_reverse_infinite] opacity-0 transition-opacity duration-1000 z-0';
+                aura.className = 'absolute w-full h-full border-[8px] border-yellow-300 rounded-full border-dashed animate-[spin_3s_linear_reverse_infinite] opacity-0 transition-opacity duration-700 z-0';
                 core.appendChild(aura);
                 fbSystem.appendChild(core);
 
@@ -1211,7 +1207,7 @@
                     const angle = (i * (360 / numFlames)) * (Math.PI / 180);
                     const flame = document.createElement('div');
                     flame.innerHTML = '🔥';
-                    flame.className = 'absolute text-5xl transition-all duration-1000 z-20';
+                    flame.className = 'absolute text-5xl transition-all duration-700 z-20';
                     flame.style.left = '100px'; 
                     flame.style.top = '100px';
                     flame.style.transform = 'translate(-50%, -50%)';
@@ -1224,7 +1220,7 @@
                 playChargeSound();
 
                 requestAnimationFrame(() => {
-                    fbSystem.style.transition = 'transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    fbSystem.style.transition = 'transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     fbSystem.style.transform = 'translate(-50%, -50%) scale(1)';
                     flames.forEach(f => {
                         const a = parseFloat(f.dataset.angle);
@@ -1248,7 +1244,7 @@
                     });
                 }, 16);
 
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, 1000));
 
                 clearInterval(spinInterval);
                 core.style.width = '180px';
@@ -1264,18 +1260,18 @@
                     f.style.transform = 'translate(-50%, -50%) scale(2)';
                 });
 
-                await new Promise(r => setTimeout(r, 800));
+                await new Promise(r => setTimeout(r, 500));
 
                 const targetX = bossRect.left + bossRect.width / 2;
                 const targetY = bossRect.top + bossRect.height / 2;
 
-                fbSystem.style.transition = 'all 0.4s cubic-bezier(0.5, 0, 1, 0.5)';
+                fbSystem.style.transition = 'all 0.3s cubic-bezier(0.5, 0, 1, 0.5)';
                 fbSystem.style.left = `${targetX}px`;
                 fbSystem.style.top = `${targetY}px`;
                 fbSystem.style.transform = 'translate(-50%, -50%) scale(1.5)';
 
                 playShootSound();
-                await new Promise(r => setTimeout(r, 400));
+                await new Promise(r => setTimeout(r, 300));
 
                 fbSystem.remove();
                 
@@ -1304,7 +1300,7 @@
                     bossRage.classList.replace('bg-red-600', 'bg-red-800'); 
                 }
 
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, 1200));
                 
                 bossAvatar.classList.remove('burn-effect');
                 if(bossRage) bossRage.classList.remove('bg-red-800');
@@ -2788,17 +2784,16 @@
                 const bossAvatarContainer = document.getElementById('boss-avatar-container');
                 const startBossContainer = document.getElementById('start-boss-avatar-container');
                 
-                const tenorUrlMatch = bossThemeVal.match(/tenor\.com\/view\/.*-(\d+)$/);
-                if (tenorUrlMatch) { bossThemeVal = tenorUrlMatch[1]; }
-
-                let bossHtmlContent = '';
+                // Boss giờ dùng logic GIỐNG Hero: URL trực tiếp hoặc SỐ ID trong kho (không còn Tenor iframe)
                 const bossPoolHit = (window.poolSrc ? poolSrc(bossThemeVal) : null);
+                let bossHtmlContent = '';
                 if (bossPoolHit) {
                     bossHtmlContent = `<img src="${bossPoolHit}" class="w-full h-full object-cover pointer-events-none bg-black" />`;
-                } else if (bossThemeVal.match(/^\d+$/)) {
-                    bossHtmlContent = `<iframe src="https://tenor.com/embed/${bossThemeVal}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`;
-                } else {
+                } else if (bossThemeVal.match(/^https?:/i)) {
                     bossHtmlContent = `<img src="${bossThemeVal}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null; this.src='https://placehold.co/400x400/1e293b/cbd5e1?text=LỖI+LINK+ẢNH';" />`;
+                } else {
+                    // Số ID không có trong kho → placeholder
+                    bossHtmlContent = `<img src="https://placehold.co/400x400/1e293b/cbd5e1?text=BOSS+${encodeURIComponent(bossThemeVal)}" class="w-full h-full object-cover pointer-events-none bg-black" />`;
                 }
                 
                 bossAvatarContainer.innerHTML = bossHtmlContent;
@@ -2899,6 +2894,20 @@
                 });
             }
 
+            // Ô Avatar BOSS: xem trước ảnh y hệt ô HERO (URL hoặc SỐ ID trong kho)
+            const bossAvatarInput = document.getElementById('boss-theme-id');
+            const bossAvatarPreview = document.getElementById('boss-avatar-preview');
+            if (bossAvatarInput && bossAvatarPreview) {
+                bossAvatarInput.addEventListener('input', function() {
+                    const val = this.value.trim();
+                    if(val && window.setImgById) {
+                        setImgById(bossAvatarPreview, val, null, `https://placehold.co/40x40/fecaca/991b1b?text=${encodeURIComponent(val.slice(0,3))}`);
+                    } else {
+                        bossAvatarPreview.src = `https://placehold.co/40x40/fecaca/991b1b?text=N/A`;
+                    }
+                });
+            }
+
             const allSettingsInputs = document.querySelectorAll('#tab-data select, #tab-data input:not(.excel-input), #tab-hero-boss input, #tab-hero-boss select, #tab-skills input, #tab-skills select');
             const savePlayBtn = document.getElementById('save-and-close-btn');
 
@@ -2975,6 +2984,8 @@
                         });
                         const heroAvatarInput = document.getElementById('hero-avatar-id');
                         if(heroAvatarInput) heroAvatarInput.dispatchEvent(new Event('input'));
+                        const bossAvatarInput = document.getElementById('boss-theme-id');
+                        if(bossAvatarInput) bossAvatarInput.dispatchEvent(new Event('input'));
                     } catch(e) { console.error("Error loading settings data:", e); }
                 }
             }
@@ -3042,7 +3053,7 @@
             var DB_NAME = 'BossJunkFoodDB';
             var STORE = 'kv';
             var POOL_KEY = 'imagesPool';
-            var MAX_SIDE = 400;
+            var MAX_SIDE = 2048;  // Tăng từ 400 lên 2048: nền game 1820px, Boss/Hero 460/380px cần ảnh sắc nét
             var QUALITY = 0.85;
 
             var imagesPool = {};           // { id: dataURL }
@@ -3591,6 +3602,14 @@
                     var idToUse;
                     if (current && !isUrl(current)) idToUse = current;
                     else idToUse = (window.__cleanIdFromName ? __cleanIdFromName(f.name) : f.name.replace(/\.[a-z0-9]+$/i, '').trim()) || ('img' + Date.now());
+                    
+                    // Tách namespace: ảnh Avatar tự động thêm prefix tránh trùng với ảnh thẻ số thuần
+                    if (inputId === 'hero-avatar-id' && !idToUse.startsWith('hero_')) {
+                        idToUse = 'hero_' + idToUse;
+                    } else if (inputId === 'boss-theme-id' && !idToUse.startsWith('boss_')) {
+                        idToUse = 'boss_' + idToUse;
+                    }
+                    
                     window.__ingestOne(f, idToUse).then(function(ok) {
                         if (ok) {
                             input.value = idToUse;
